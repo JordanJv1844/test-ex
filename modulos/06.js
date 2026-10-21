@@ -211,3 +211,4 @@ function initVistaActividadInline() {
         instancia.appendChild(btnToggle);
     });
 }
+window.initVistaActividadInline = initVistaActividadInline;
