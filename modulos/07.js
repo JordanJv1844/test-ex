@@ -59,11 +59,11 @@ function initCalculadoraNotas() {
                     #tree.simulador-activo i.fa, #tree.simulador-activo .icon, #tree.simulador-activo img.activityicon { display: none !important; }
                     #tree.simulador-activo li.list-group-item { border-left: 4px solid transparent !important; display: flex !important; align-items: center !important; justify-content: space-between !important;}
                     
-                    /* NIVEL 1: UNIDAD / RA (Color Pizarra Oscuro - Profesional) */
-                    #tree.simulador-activo .fila-ra { background-color: #334155 !important; border-left-color: #0f172a !important; border-bottom: 2px solid #1e293b !important; padding-left: 15px !important;}
-                    #tree.simulador-activo .texto-ra { font-weight: 700 !important; font-size: 12.5px !important; color: #f8fafc !important; display: flex; align-items: center; gap: 8px; flex: 1; padding-right: 15px;}
-                    #tree.simulador-activo .badge-ra { background-color: #475569 !important; color: #ffffff !important; border: 1px solid #1e293b !important;}
-                    #tree.simulador-activo .badge-ra .sim-input { background-color: #64748b !important; color: white !important; border-color: transparent !important; }
+                   /* NIVEL 1: RA (Resultado Aprendizaje - Padre Principal) */
+                    .fila-ra { background-color: #fef2f2 !important; border-left-color: #ef4444 !important; border-bottom: 2px solid #fca5a5 !important; padding-left: 15px !important;}
+                    .texto-ra { font-weight: 700 !important; font-size: 12.5px !important; color: #7f1d1d !important; display: flex; align-items: center; gap: 8px; flex: 1; padding-right: 15px;}
+                    .badge-ra { background-color: #ef4444 !important; color: #ffffff !important; border: 1px solid #dc2626 !important;}
+                    .badge-ra .sim-input { background-color: #f87171 !important; color: white !important; border-color: transparent !important; }
 
                     /* NIVEL 2: Indicador (Gris Claro Azulado) */
                     #tree.simulador-activo .fila-indicador { background-color: #f8fafc !important; padding-left: 30px !important; position: relative; border-bottom: 1px solid #e2e8f0 !important; }
