@@ -1,8 +1,9 @@
-// =========================================
-// MÓDULO 7: CALCULADORA DE NOTAS V2
-// =========================================
+
 const ICONOS_USAT = window.ICONOS_USAT;
 const forzarIngreso = window.forzarIngreso;
+// =========================================
+// MÓDULO 7: CALCULADORA DE NOTAS V2 (Jerarquía Visual)
+// =========================================
 let isSimulating = false;
 let originalTreeHTML = '';
 
@@ -53,12 +54,36 @@ function initCalculadoraNotas() {
                     .btn-simulador.activo { background-color: #374151; }
                     .btn-silabo { width: 100%; margin-bottom: 15px; padding: 8px; background-color: #10b981; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; display: none; align-items: center; justify-content: center; gap: 8px; }
                     .btn-silabo:hover { background-color: #059669; }
-                    .sim-input { width: 55px; text-align: center; color: #111827; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px; font-size: 13px; font-weight: bold; outline: none; }
-                    .sim-input:focus, .sim-weight:focus { border-color: #0ea5e9; box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2); }
-                    .sim-weight { width: 42px; text-align: center; color: #111827; border: 1px solid #eab308; border-radius: 4px; padding: 2px; font-size: 12px; font-weight: bold; outline: none; background-color: #fef08a; margin-right: 5px; transition: 0.3s; }
-                    .unverified { background-color: #fca5a5 !important; border-color: #ef4444 !important; color: #7f1d1d !important; }
-                    .sim-readonly { background-color: #d1d5db !important; color: #374151 !important; border-color: #9ca3af !important; }
+                    
+                    /* LIMPIEZA DE ÍCONOS ROTOS Y REDISEÑO DE JERARQUÍA */
+                    #tree i.fa { display: none !important; }
+                    #tree li.list-group-item { border-left: 4px solid transparent !important; display: flex !important; align-items: center !important; justify-content: space-between !important;}
+                    
+                    /* Estilos para la fila del Indicador (Padre) */
+                    .fila-indicador { background-color: #f8fafc !important; border-left-color: #94a3b8 !important; border-bottom: 1px solid #e2e8f0 !important; }
+                    .texto-indicador { font-weight: 700 !important; font-size: 12px !important; color: #0f172a !important; display: flex; align-items: center; gap: 8px; flex: 1; padding-right: 15px;}
+                    .icono-ind svg { stroke: #64748b !important; width: 14px; height: 14px; flex-shrink: 0;}
+                    
+                    /* Estilos para la fila de Evaluación (Hijo) */
+                    .fila-evaluacion { background-color: #ffffff !important; padding-left: 45px !important; position: relative; border-bottom: 1px dashed #e2e8f0 !important; }
+                    .fila-evaluacion::before { content: ""; position: absolute; left: 24px; top: 0; bottom: 50%; width: 1px; border-left: 2px solid #cbd5e1; }
+                    .fila-evaluacion::after { content: ""; position: absolute; left: 24px; top: 50%; width: 12px; border-top: 2px solid #cbd5e1; }
+                    .texto-evaluacion { font-weight: 500 !important; font-size: 11.5px !important; color: #475569 !important; display: flex; align-items: center; gap: 8px; flex: 1; padding-right: 15px;}
+                    .icono-eval svg { stroke: #94a3b8 !important; width: 13px; height: 13px; flex-shrink: 0;}
+
+                    /* Inputs y Badges */
+                    .sim-input { width: 50px; text-align: center; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px; font-size: 13px; font-weight: 700; outline: none; transition: 0.2s;}
+                    .sim-input:focus, .sim-weight:focus { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2); }
+                    .sim-weight { width: 45px; text-align: center; color: #0f172a; border: 1px dashed #94a3b8; border-radius: 4px; padding: 2px; font-size: 11.5px; font-weight: 600; outline: none; background-color: #f1f5f9; margin-right: 5px; transition: 0.2s; }
+                    
+                    .badge { display: flex !important; align-items: center; gap: 4px; padding: 5px 8px !important; border-radius: 6px !important; font-size: 11px !important; font-weight: 600 !important; white-space: nowrap; flex-shrink: 0;}
+                    .badge-indicador { background-color: #e2e8f0 !important; color: #334155 !important; border: 1px solid #cbd5e1;}
+                    .badge-evaluacion { background-color: #eff6ff !important; color: #1e3a8a !important; border: 1px solid #bfdbfe;}
+                    
+                    .unverified { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #991b1b !important; }
+                    .sim-readonly { background-color: #e2e8f0 !important; color: #475569 !important; border-color: transparent !important; }
                     #sim-final-grade { font-size: 16px; font-weight: 900; color: white; }
+                    
                     html, body { overflow-y: auto !important; padding-bottom: 150px !important; }
                     .table-responsive { margin-bottom: 80px !important; overflow: visible !important; }
                 `;
@@ -274,8 +299,9 @@ function transformarACalculadora(tree, iframeDoc) {
 
     items.forEach(li => {
         const badge = li.querySelector('.badge');
-        const textContent = li.innerText;
+        let textContent = li.innerText.trim();
 
+        // 1. Detección de Fila Promedio Final
         if (textContent.includes('PROMEDIO') && textContent.includes('FINAL')) {
             if (badge) {
                 badge.innerHTML = `<span id="sim-final-grade">00.00</span>`;
@@ -284,6 +310,7 @@ function transformarACalculadora(tree, iframeDoc) {
             return;
         }
 
+        // 2. Detección de Fila Encabezado de Unidad
         if (li.querySelector('b') && li.querySelector('b').innerText.includes('UNIDAD')) {
             currentUnit = { weight: 0, unitAvgInput: null, indicators: [] };
             allUnits.push(currentUnit);
@@ -292,6 +319,7 @@ function transformarACalculadora(tree, iframeDoc) {
             return;
         }
 
+        // 3. Detección de Fila Peso Total de Unidad
         if (badge && textContent.includes('Peso:')) {
             if (!currentUnit) {
                 currentUnit = { weight: 0, unitAvgInput: null, indicators: [] };
@@ -306,12 +334,22 @@ function transformarACalculadora(tree, iframeDoc) {
             return;
         }
 
+        // Limpieza de texto principal para extraer solo el nombre de la fila
+        let nombreFila = Array.from(li.childNodes)
+            .filter(node => node.nodeType === Node.TEXT_NODE)
+            .map(node => node.textContent.trim())
+            .join(' ');
+        
+        // 4. Detección de Fila Indicador (No tiene badge originalmente)
         if (!badge) {
-            if (textContent.trim() === '') return;
+            if (nombreFila === '') return;
+            li.classList.add('fila-indicador');
+            
+            // Envuelve el texto y añade el ícono
+            li.innerHTML = `<span class="texto-indicador"><span class="icono-ind">${ICONOS_USAT.tareasPortapapeles}</span>${nombreFila}</span>`;
+            
             const newBadge = iframeDoc.createElement('span');
-            newBadge.className = 'badge';
-            newBadge.style.backgroundColor = '#737579';
-            newBadge.style.color = '#ffffff';
+            newBadge.className = 'badge badge-indicador';
             newBadge.innerHTML = `Peso: <input type="number" class="sim-weight" data-id="w-i-${uIdx - 1}-${iIdx}" placeholder="%" title="Peso del indicador"> % | <input type="number" class="sim-input sim-readonly" disabled title="Promedio Automático">`;
             li.appendChild(newBadge);
 
@@ -325,17 +363,25 @@ function transformarACalculadora(tree, iframeDoc) {
             return;
         }
 
+        // 5. Detección de Fila Evaluación (Tiene badge, pero no dice "Peso:")
         if (badge && !textContent.includes('Peso:')) {
-            badge.style.backgroundColor = '#3b82f6';
-            badge.style.color = '#ffffff';
-
+            li.classList.add('fila-evaluacion');
+            
+            // Conservamos la estructura de flexbox, pero empujamos el texto y quitamos el ícono roto nativo
+            li.innerHTML = `<span class="texto-evaluacion"><span class="icono-eval">${ICONOS_USAT.documento.replace('#ffffff', '#94a3b8')}</span>${nombreFila}</span>`;
+            
             let textoNota = badge.innerText.trim();
             let val = textoNota.includes('Pendiente') ? '' : (textoNota.match(/[\d.]+/)?.[0] || '');
 
-            badge.innerHTML = `Peso: <input type="number" class="sim-weight" data-id="w-e-${uIdx - 1}-${iIdx > 0 ? iIdx - 1 : 0}-${eIdx}" placeholder="%"> % | <input type="number" class="sim-input" 
-                data-id="n-e-${uIdx - 1}-${iIdx > 0 ? iIdx - 1 : 0}-${eIdx}" value="${val}" step="0.1" min="0" max="20" placeholder="-">`;
-            const evalWeight = badge.querySelector('.sim-weight');
-            const evalNote = badge.querySelector('.sim-input');
+            const newBadge = iframeDoc.createElement('span');
+            newBadge.className = 'badge badge-evaluacion';
+            // Invertimos el orden visual y estilizamos inputs
+            newBadge.innerHTML = `Vale: <input type="number" class="sim-weight" data-id="w-e-${uIdx - 1}-${iIdx > 0 ? iIdx - 1 : 0}-${eIdx}" placeholder="%"> % | Nota: <input type="number" class="sim-input" data-id="n-e-${uIdx - 1}-${iIdx > 0 ? iIdx - 1 : 0}-${eIdx}" value="${val}" step="0.1" min="0" max="20" placeholder="-">`;
+            
+            li.appendChild(newBadge);
+
+            const evalWeight = newBadge.querySelector('.sim-weight');
+            const evalNote = newBadge.querySelector('.sim-input');
 
             if (!currentIndicator) {
                 currentIndicator = { weightInput: null, avgInput: null, evaluations: [] };
