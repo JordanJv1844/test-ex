@@ -356,3 +356,4 @@ function initVistaPreviaModal() {
         if (previo) previo.remove();
     }
 }
+window.initVistaPreviaModal = initVistaPreviaModal;
