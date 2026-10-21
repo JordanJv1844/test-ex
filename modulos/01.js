@@ -114,3 +114,4 @@ function injectConfigUI(userInput, passInput, loginBtn, esIncognito) {
     });
     loginBtn.parentElement.appendChild(configBtn);
 }
+window.initAutoLogin = initAutoLogin;
