@@ -1,6 +1,8 @@
 // =========================================
 // MÓDULO 2: BLOQUEADOR DE ANUNCIOS INTELIGENTE
 // =========================================
+const ICONOS_USAT = window.ICONOS_USAT;
+const forzarIngreso = window.forzarIngreso;
 function initAdBlocker() {
     const contenedorAnuncios = document.getElementById('id_anuncios_modal');
     if (!contenedorAnuncios) return;
