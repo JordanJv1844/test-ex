@@ -1,9 +1,7 @@
 const ICONOS_USAT = window.ICONOS_USAT;
-const forzarIngreso = window.forzarIngreso;
-
 
 // =========================================
-// MÓDULO 7: CALCULADORA DE NOTAS V2 (Matemática Exacta y Advertencia)
+// MÓDULO 7: CALCULADORA DE NOTAS V2 (Matemática Exacta y Notificación Optimizada)
 // =========================================
 let isSimulating = false;
 let originalTreeHTML = '';
@@ -128,20 +126,47 @@ function initCalculadoraNotas() {
                     btnSilabo.style.display = 'inline-flex';
                     isSimulating = true;
                     
-                    // NOTIFICACIÓN FLOTANTE DE ADVERTENCIA
-                    let toastWarning = iframeDoc.getElementById('usat-calc-warning');
-                    if (!toastWarning) {
-                        toastWarning = iframeDoc.createElement('div');
-                        toastWarning.id = 'usat-calc-warning';
-                        toastWarning.style.cssText = 'position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: #f59e0b; color: #fff; padding: 12px 24px; border-radius: 8px; font-family: Arial, sans-serif; font-size: 13px; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 999999; opacity: 0; transition: opacity 0.3s ease; text-align: center; pointer-events: none;';
-                        toastWarning.innerHTML = '⚠️ Te recomendamos comparar los pesos con tu sílabo.<br>La calculadora automática podría equivocarse al tomar los valores.';
-                        iframeDoc.body.appendChild(toastWarning);
+                    // NOTIFICACIÓN FLOTANTE OPTIMIZADA CON BOTÓN DE OCULTAR
+                    if (!localStorage.getItem('usat_pro_hideCalcWarning')) {
+                        let toastWarning = iframeDoc.getElementById('usat-calc-warning');
+                        if (!toastWarning) {
+                            toastWarning = iframeDoc.createElement('div');
+                            toastWarning.id = 'usat-calc-warning';
+                            toastWarning.style.cssText = 'position: fixed; bottom: 20px; left: 20px; transform: translateX(-150%); background-color: #f59e0b; color: #fff; padding: 12px 16px; border-radius: 8px; font-family: Arial, sans-serif; font-size: 13px; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 999999; opacity: 0; transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; flex-direction: column; gap: 8px; max-width: 320px; pointer-events: auto;';
+                            
+                            toastWarning.innerHTML = `
+                                <div style="display: flex; align-items: flex-start; gap: 8px;">
+                                    <span style="font-size: 16px; line-height: 1;">⚠️</span>
+                                    <span style="line-height: 1.4;">Te recomendamos comparar los pesos con tu sílabo. La calculadora automática podría equivocarse al tomar los valores.</span>
+                                </div>
+                                <div style="text-align: right; border-top: 1px solid rgba(255,255,255,0.3); padding-top: 6px; margin-top: 2px;">
+                                    <button id="btn-hide-warning" style="background: transparent; border: none; color: white; text-decoration: underline; font-size: 11px; cursor: pointer; font-weight: normal; padding: 0;">No volver a mostrar</button>
+                                </div>
+                            `;
+                            iframeDoc.body.appendChild(toastWarning);
+
+                            iframeDoc.getElementById('btn-hide-warning').addEventListener('click', () => {
+                                localStorage.setItem('usat_pro_hideCalcWarning', 'true');
+                                toastWarning.style.transform = 'translateX(-150%)';
+                                toastWarning.style.opacity = '0';
+                                setTimeout(() => toastWarning.remove(), 400);
+                            });
+                        }
+                        
+                        setTimeout(() => {
+                            toastWarning.style.transform = 'translateX(0)';
+                            toastWarning.style.opacity = '1';
+                        }, 10);
+
+                        // Ocultado automático a los 8 segundos si no se hace clic
+                        setTimeout(() => {
+                            if (iframeDoc.getElementById('usat-calc-warning')) {
+                                toastWarning.style.transform = 'translateX(-150%)';
+                                toastWarning.style.opacity = '0';
+                                setTimeout(() => toastWarning.remove(), 400);
+                            }
+                        }, 8000);
                     }
-                    setTimeout(() => toastWarning.style.opacity = '1', 10);
-                    setTimeout(() => {
-                        toastWarning.style.opacity = '0';
-                        setTimeout(() => toastWarning.remove(), 300);
-                    }, 5500);
 
                     transformarACalculadora(tree, iframeDoc);
                     setTimeout(() => { iframe.style.height = (iframeDoc.body.scrollHeight + 250) + 'px'; }, 100);
@@ -359,7 +384,7 @@ function transformarACalculadora(tree, iframeDoc) {
             currentUnit.weight = weightMatch ? parseFloat(weightMatch[1]) / 100 : 0;
 
             li.classList.add('fila-ra');
-            li.innerHTML = `<span class="texto-ra"><span class="icono-usr">${ICONOS_USAT.tareasPortapapeles.replace('#ffffff', '#ef4444')}</span>${nombreFila}</span>`;
+            li.innerHTML = `<span class="texto-ra"><span class="icono-usr">${ICONOS_USAT.tareasPortapapeles.replace('#ffffff', '#94a3b8')}</span>${nombreFila}</span>`;
 
             const newBadge = iframeDoc.createElement('span');
             newBadge.className = 'badge badge-ra';
@@ -476,7 +501,6 @@ function recalcularTodo(units, finalGradeElement) {
             let indEvalsCount = 0;
 
             ind.evaluations.forEach(ev => {
-                // LÓGICA DE VACÍOS = 0: Transforma inputs vacíos en 0 matemáticamente
                 let noteText = ev.noteInput.value.trim();
                 let note = noteText === '' ? 0 : parseFloat(noteText);
                 const weight = parseFloat(ev.weightInput.value);
