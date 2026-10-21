@@ -1,6 +1,8 @@
 // =========================================
 // MÓDULO 1: AUTO-LOGIN Y GESTIÓN DE CREDENCIALES
 // =========================================
+const ICONOS_USAT = window.ICONOS_USAT;
+const forzarIngreso = window.forzarIngreso;
 function initAutoLogin() {
     const esIncognito = chrome.extension.inIncognitoContext;
     const userInput = document.querySelector('#txtUsername');
