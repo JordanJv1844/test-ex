@@ -1,4 +1,4 @@
-
+// EMULADOR DE API CHROME PARA ENTORNO MAIN
 if (typeof chrome === 'undefined') {
     window.chrome = {};
 }
@@ -27,6 +27,8 @@ if (!chrome.storage) {
                     for (let k in items) {
                         localStorage.setItem('usat_pro_' + k, JSON.stringify(items[k]));
                     }
+                    // Sincronización bidireccional: Avisa a sync.js para que guarde en la extensión real
+                    window.postMessage({ type: 'USAT_SYNC_TO_EXT', items: items }, '*');
                 } catch(e) {}
                 if (callback) callback();
             }
@@ -110,6 +112,7 @@ function initGuardianSesion() {
             });
     }, intervaloPing);
 }
+
 window.ICONOS_USAT = ICONOS_USAT;
 window.forzarIngreso = forzarIngreso;
 window.initAutoRedirect = initAutoRedirect;
