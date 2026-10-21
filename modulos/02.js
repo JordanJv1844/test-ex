@@ -148,3 +148,4 @@ function initAdBlocker() {
         }, 4000);
     }
 }
+window.initAdBlocker = initAdBlocker;
