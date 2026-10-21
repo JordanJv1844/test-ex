@@ -1,8 +1,9 @@
 
-const ICONOS_USAT = window.ICONOS_USAT;
 const forzarIngreso = window.forzarIngreso;
+const ICONOS_USAT = window.ICONOS_USAT;
+
 // =========================================
-// MÓDULO 7: CALCULADORA DE NOTAS V2 (Jerarquía Visual)
+// MÓDULO 7: CALCULADORA DE NOTAS V2 (Jerarquía y Lógica Segura)
 // =========================================
 let isSimulating = false;
 let originalTreeHTML = '';
@@ -55,34 +56,40 @@ function initCalculadoraNotas() {
                     .btn-silabo { width: 100%; margin-bottom: 15px; padding: 8px; background-color: #10b981; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; display: none; align-items: center; justify-content: center; gap: 8px; }
                     .btn-silabo:hover { background-color: #059669; }
                     
-                    /* LIMPIEZA DE ÍCONOS ROTOS Y REDISEÑO DE JERARQUÍA */
-                    #tree i.fa { display: none !important; }
+                    /* LIMPIEZA DE ÍCONOS ROTOS Y ESTRUCTURA BASE */
+                    #tree i.fa, #tree .icon, #tree img.activityicon { display: none !important; }
                     #tree li.list-group-item { border-left: 4px solid transparent !important; display: flex !important; align-items: center !important; justify-content: space-between !important;}
                     
-                    /* Estilos para la fila del Indicador (Padre) */
-                    .fila-indicador { background-color: #f8fafc !important; border-left-color: #94a3b8 !important; border-bottom: 1px solid #e2e8f0 !important; }
-                    .texto-indicador { font-weight: 700 !important; font-size: 12px !important; color: #0f172a !important; display: flex; align-items: center; gap: 8px; flex: 1; padding-right: 15px;}
-                    .icono-ind svg { stroke: #64748b !important; width: 14px; height: 14px; flex-shrink: 0;}
-                    
-                    /* Estilos para la fila de Evaluación (Hijo) */
-                    .fila-evaluacion { background-color: #ffffff !important; padding-left: 45px !important; position: relative; border-bottom: 1px dashed #e2e8f0 !important; }
-                    .fila-evaluacion::before { content: ""; position: absolute; left: 24px; top: 0; bottom: 50%; width: 1px; border-left: 2px solid #cbd5e1; }
-                    .fila-evaluacion::after { content: ""; position: absolute; left: 24px; top: 50%; width: 12px; border-top: 2px solid #cbd5e1; }
-                    .texto-evaluacion { font-weight: 500 !important; font-size: 11.5px !important; color: #475569 !important; display: flex; align-items: center; gap: 8px; flex: 1; padding-right: 15px;}
-                    .icono-eval svg { stroke: #94a3b8 !important; width: 13px; height: 13px; flex-shrink: 0;}
+                    /* NIVEL 1: RA (Resultado Aprendizaje - Padre Principal) */
+                    .fila-ra { background-color: #fef2f2 !important; border-left-color: #ef4444 !important; border-bottom: 2px solid #fca5a5 !important; padding-left: 15px !important;}
+                    .texto-ra { font-weight: 700 !important; font-size: 12.5px !important; color: #7f1d1d !important; display: flex; align-items: center; gap: 8px; flex: 1; padding-right: 15px;}
+                    .badge-ra { background-color: #ef4444 !important; color: #ffffff !important; border: 1px solid #dc2626 !important;}
+                    .badge-ra .sim-input { background-color: #f87171 !important; color: white !important; border-color: transparent !important; }
 
-                    /* Inputs y Badges */
-                    .sim-input { width: 50px; text-align: center; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px; font-size: 13px; font-weight: 700; outline: none; transition: 0.2s;}
+                    /* NIVEL 2: Indicador (Sub-Padre) */
+                    .fila-indicador { background-color: #fffafb !important; padding-left: 30px !important; position: relative; border-bottom: 1px solid #fecaca !important; }
+                    .fila-indicador::before { content: ""; position: absolute; left: 14px; top: 0; bottom: 50%; width: 1px; border-left: 2px solid #fca5a5; }
+                    .fila-indicador::after { content: ""; position: absolute; left: 14px; top: 50%; width: 10px; border-top: 2px solid #fca5a5; }
+                    .texto-indicador { font-weight: 700 !important; font-size: 12px !important; color: #991b1b !important; display: flex; align-items: center; gap: 8px; flex: 1; padding-right: 15px;}
+                    .badge-indicador { background-color: #fee2e2 !important; color: #991b1b !important; border: 1px solid #fca5a5;}
+
+                    /* NIVEL 3: Evaluación (Hijo - Azul/Gris) */
+                    .fila-evaluacion { background-color: #ffffff !important; padding-left: 45px !important; position: relative; border-bottom: 1px dashed #e2e8f0 !important; }
+                    .fila-evaluacion::before { content: ""; position: absolute; left: 28px; top: 0; bottom: 50%; width: 1px; border-left: 2px solid #cbd5e1; }
+                    .fila-evaluacion::after { content: ""; position: absolute; left: 28px; top: 50%; width: 10px; border-top: 2px solid #cbd5e1; }
+                    .texto-evaluacion { font-weight: 500 !important; font-size: 11.5px !important; color: #475569 !important; display: flex; align-items: center; gap: 8px; flex: 1; padding-right: 15px;}
+                    .badge-evaluacion { background-color: #eff6ff !important; color: #1e3a8a !important; border: 1px solid #bfdbfe;}
+
+                    /* INPUTS Y COMPONENTES VISUALES */
+                    .sim-input { width: 62px; text-align: center; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 4px; font-size: 13px; font-weight: 700; outline: none; transition: 0.2s; box-sizing: border-box;}
                     .sim-input:focus, .sim-weight:focus { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2); }
-                    .sim-weight { width: 45px; text-align: center; color: #0f172a; border: 1px dashed #94a3b8; border-radius: 4px; padding: 2px; font-size: 11.5px; font-weight: 600; outline: none; background-color: #f1f5f9; margin-right: 5px; transition: 0.2s; }
+                    .sim-weight { width: 48px; text-align: center; color: #0f172a; border: 1px dashed #94a3b8; border-radius: 4px; padding: 2px 4px; font-size: 11.5px; font-weight: 600; outline: none; background-color: #f1f5f9; margin-right: 5px; transition: 0.2s; box-sizing: border-box;}
                     
                     .badge { display: flex !important; align-items: center; gap: 4px; padding: 5px 8px !important; border-radius: 6px !important; font-size: 11px !important; font-weight: 600 !important; white-space: nowrap; flex-shrink: 0;}
-                    .badge-indicador { background-color: #e2e8f0 !important; color: #334155 !important; border: 1px solid #cbd5e1;}
-                    .badge-evaluacion { background-color: #eff6ff !important; color: #1e3a8a !important; border: 1px solid #bfdbfe;}
-                    
                     .unverified { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #991b1b !important; }
                     .sim-readonly { background-color: #e2e8f0 !important; color: #475569 !important; border-color: transparent !important; }
                     #sim-final-grade { font-size: 16px; font-weight: 900; color: white; }
+                    .icono-usr svg { width: 14px; height: 14px; flex-shrink: 0; }
                     
                     html, body { overflow-y: auto !important; padding-bottom: 150px !important; }
                     .table-responsive { margin-bottom: 80px !important; overflow: visible !important; }
@@ -301,6 +308,12 @@ function transformarACalculadora(tree, iframeDoc) {
         const badge = li.querySelector('.badge');
         let textContent = li.innerText.trim();
 
+        // Limpieza de texto principal para extraer solo el nombre de la fila
+        let nombreFila = Array.from(li.childNodes)
+            .filter(node => node.nodeType === Node.TEXT_NODE)
+            .map(node => node.textContent.trim())
+            .join(' ');
+
         // 1. Detección de Fila Promedio Final
         if (textContent.includes('PROMEDIO') && textContent.includes('FINAL')) {
             if (badge) {
@@ -319,7 +332,7 @@ function transformarACalculadora(tree, iframeDoc) {
             return;
         }
 
-        // 3. Detección de Fila Peso Total de Unidad
+        // 3. Detección de Fila RA (Resultado Aprendizaje - Padre, originalmente dice "Peso: X%")
         if (badge && textContent.includes('Peso:')) {
             if (!currentUnit) {
                 currentUnit = { weight: 0, unitAvgInput: null, indicators: [] };
@@ -329,28 +342,29 @@ function transformarACalculadora(tree, iframeDoc) {
             const weightMatch = textContent.match(/Peso:\s*([\d.]+)%/);
             currentUnit.weight = weightMatch ? parseFloat(weightMatch[1]) / 100 : 0;
 
-            badge.innerHTML = `Peso: ${(currentUnit.weight * 100).toFixed(0)}% | <input type="number" class="sim-input sim-readonly" disabled title="Promedio Automático de Unidad">`;
-            currentUnit.unitAvgInput = badge.querySelector('input');
+            li.classList.add('fila-ra');
+            li.innerHTML = `<span class="texto-ra"><span class="icono-usr">${ICONOS_USAT.tareasPortapapeles.replace('#ffffff', '#ef4444')}</span>${nombreFila}</span>`;
+
+            const newBadge = iframeDoc.createElement('span');
+            newBadge.className = 'badge badge-ra';
+            newBadge.innerHTML = `Peso: ${(currentUnit.weight * 100).toFixed(0)}% | <input type="number" class="sim-input sim-readonly" disabled title="Promedio Automático del RA">`;
+            
+            li.appendChild(newBadge);
+            currentUnit.unitAvgInput = newBadge.querySelector('input');
             return;
         }
 
-        // Limpieza de texto principal para extraer solo el nombre de la fila
-        let nombreFila = Array.from(li.childNodes)
-            .filter(node => node.nodeType === Node.TEXT_NODE)
-            .map(node => node.textContent.trim())
-            .join(' ');
-        
-        // 4. Detección de Fila Indicador (No tiene badge originalmente)
+        // 4. Detección de Fila Indicador (Sub-Padre, originalmente NO tiene badge)
         if (!badge) {
             if (nombreFila === '') return;
+            
             li.classList.add('fila-indicador');
-            
-            // Envuelve el texto y añade el ícono
-            li.innerHTML = `<span class="texto-indicador"><span class="icono-ind">${ICONOS_USAT.tareasPortapapeles}</span>${nombreFila}</span>`;
-            
+            li.innerHTML = `<span class="texto-indicador"><span class="icono-usr">${ICONOS_USAT.llaveBlanco.replace('#ffffff', '#f87171')}</span>${nombreFila}</span>`;
+
             const newBadge = iframeDoc.createElement('span');
             newBadge.className = 'badge badge-indicador';
             newBadge.innerHTML = `Peso: <input type="number" class="sim-weight" data-id="w-i-${uIdx - 1}-${iIdx}" placeholder="%" title="Peso del indicador"> % | <input type="number" class="sim-input sim-readonly" disabled title="Promedio Automático">`;
+            
             li.appendChild(newBadge);
 
             currentIndicator = {
@@ -363,20 +377,18 @@ function transformarACalculadora(tree, iframeDoc) {
             return;
         }
 
-        // 5. Detección de Fila Evaluación (Tiene badge, pero no dice "Peso:")
+        // 5. Detección de Fila Evaluación (Hijo final, tiene badge pero originalmente no dice "Peso:")
         if (badge && !textContent.includes('Peso:')) {
             li.classList.add('fila-evaluacion');
-            
-            // Conservamos la estructura de flexbox, pero empujamos el texto y quitamos el ícono roto nativo
-            li.innerHTML = `<span class="texto-evaluacion"><span class="icono-eval">${ICONOS_USAT.documento.replace('#ffffff', '#94a3b8')}</span>${nombreFila}</span>`;
-            
+            li.innerHTML = `<span class="texto-evaluacion"><span class="icono-usr">${ICONOS_USAT.documento.replace('#ffffff', '#94a3b8')}</span>${nombreFila}</span>`;
+
             let textoNota = badge.innerText.trim();
             let val = textoNota.includes('Pendiente') ? '' : (textoNota.match(/[\d.]+/)?.[0] || '');
 
             const newBadge = iframeDoc.createElement('span');
             newBadge.className = 'badge badge-evaluacion';
-            // Invertimos el orden visual y estilizamos inputs
-            newBadge.innerHTML = `Vale: <input type="number" class="sim-weight" data-id="w-e-${uIdx - 1}-${iIdx > 0 ? iIdx - 1 : 0}-${eIdx}" placeholder="%"> % | Nota: <input type="number" class="sim-input" data-id="n-e-${uIdx - 1}-${iIdx > 0 ? iIdx - 1 : 0}-${eIdx}" value="${val}" step="0.1" min="0" max="20" placeholder="-">`;
+            // EXTRAEMOS DATA-REAL-VAL: Guardamos la nota real del profesor en un atributo oculto
+            newBadge.innerHTML = `Vale: <input type="number" class="sim-weight" data-id="w-e-${uIdx - 1}-${iIdx > 0 ? iIdx - 1 : 0}-${eIdx}" placeholder="%"> % | Nota: <input type="number" class="sim-input" data-real-val="${val}" data-id="n-e-${uIdx - 1}-${iIdx > 0 ? iIdx - 1 : 0}-${eIdx}" value="${val}" step="0.1" min="0" max="20" placeholder="-">`;
             
             li.appendChild(newBadge);
 
@@ -408,7 +420,16 @@ function transformarACalculadora(tree, iframeDoc) {
             const data = result[storageKey];
             inputs.forEach(inp => {
                 if (data[inp.dataset.id] !== undefined) {
-                    inp.value = data[inp.dataset.id];
+                    const isNoteInput = inp.classList.contains('sim-input') && !inp.hasAttribute('disabled');
+                    const realVal = inp.getAttribute('data-real-val') || '';
+                    
+                    // LÓGICA DE PROTECCIÓN: Si es una nota y el profesor ya subió una calificación real, la respetamos.
+                    if (isNoteInput && realVal !== '') {
+                        inp.value = realVal;
+                    } else {
+                        // De lo contrario, restauramos lo guardado (pesos, o notas simuladas en casillas vacías)
+                        inp.value = data[inp.dataset.id];
+                    }
                     inp.classList.remove('unverified');
                 }
             });
