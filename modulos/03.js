@@ -1,6 +1,8 @@
 // =========================================
 // MÓDULO 3: MONITOR DE TAREAS PENDIENTES
 // =========================================
+const ICONOS_USAT = window.ICONOS_USAT;
+const forzarIngreso = window.forzarIngreso;
 async function initMonitorTareas() {
     if (!window.location.href.includes('aulavirtual')) return;
     // Evitamos que el panel aparezca cuando se abre el visor nativo de archivos de Moodle
