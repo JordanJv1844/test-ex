@@ -443,3 +443,5 @@ function recalcularTodo(units, finalGradeElement) {
         }
     }
 }
+
+window.initCalculadoraNotas = initCalculadoraNotas;
