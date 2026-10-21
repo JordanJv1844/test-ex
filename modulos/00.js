@@ -110,3 +110,5 @@ function initGuardianSesion() {
             });
     }, intervaloPing);
 }
+window.ICONOS_USAT = ICONOS_USAT;
+window.forzarIngreso = forzarIngreso;
