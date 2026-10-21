@@ -1,3 +1,40 @@
+
+if (typeof chrome === 'undefined') {
+    window.chrome = {};
+}
+if (!chrome.extension) {
+    chrome.extension = { inIncognitoContext: false };
+}
+if (!chrome.runtime) {
+    chrome.runtime = { sendMessage: function(msg, cb) { if(cb) cb(); } };
+}
+if (!chrome.storage) {
+    chrome.storage = {
+        local: {
+            get: function(keys, callback) {
+                let result = {};
+                try {
+                    let keyArray = Array.isArray(keys) ? keys : [keys];
+                    keyArray.forEach(k => {
+                        let val = localStorage.getItem('usat_pro_' + k);
+                        if (val !== null) result[k] = JSON.parse(val);
+                    });
+                } catch(e) {}
+                if (callback) callback(result);
+            },
+            set: function(items, callback) {
+                try {
+                    for (let k in items) {
+                        localStorage.setItem('usat_pro_' + k, JSON.stringify(items[k]));
+                    }
+                } catch(e) {}
+                if (callback) callback();
+            }
+        },
+        onChanged: { addListener: function() {} }
+    };
+}
+
 console.log("Extensión del campus cargada");
 
 // =========================================
