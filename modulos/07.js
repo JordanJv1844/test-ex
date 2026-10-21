@@ -1,6 +1,8 @@
 // =========================================
 // MÓDULO 7: CALCULADORA DE NOTAS V2
 // =========================================
+const ICONOS_USAT = window.ICONOS_USAT;
+const forzarIngreso = window.forzarIngreso;
 let isSimulating = false;
 let originalTreeHTML = '';
 
