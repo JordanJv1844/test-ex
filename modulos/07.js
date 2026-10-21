@@ -65,7 +65,7 @@ function initCalculadoraNotas() {
                     #tree.simulador-activo .fila-ra { background-color: #fef2f2 !important; border-left-color: #ef4444 !important; border-bottom: 2px solid #fca5a5 !important; padding-left: 15px !important;}
                     #tree.simulador-activo .texto-ra { font-weight: 700 !important; font-size: 12.5px !important; color: #7f1d1d !important; display: flex; align-items: center; gap: 8px; flex: 1; padding-right: 15px;}
                     #tree.simulador-activo .badge-ra { background-color: #475569 !important; color: #ffffff !important; border: 1px solid #1e293bb4 !important;}
-                    #tree.simulador-activo .badge-ra .sim-input { background-color: #f87171 !important; color: white !important; border-color: transparent !important; }
+                    .badge-ra .sim-input { background-color: #f87171 !important; color: white !important; border-color: transparent !important; }
 
                     /* NIVEL 2: Indicador (Gris Claro Azulado) */
                     #tree.simulador-activo .fila-indicador { background-color: #f8fafc !important; padding-left: 30px !important; position: relative; border-bottom: 1px solid #e2e8f0 !important; }
