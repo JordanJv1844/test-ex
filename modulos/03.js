@@ -34,8 +34,15 @@ async function initMonitorTareas() {
         if (!document.getElementById('contenedor-tareas-usat')) {
             const contenedor = document.createElement('div');
             contenedor.id = 'contenedor-tareas-usat';
+            
+            // FIX 1: Evitar que el contenedor base sea un escudo invisible que bloquee el scroll
             Object.assign(contenedor.style, {
-                position: 'fixed', bottom: '20px', right: '20px', zIndex: '999999', fontFamily: 'Arial, sans-serif'
+                position: 'fixed', 
+                bottom: '20px', 
+                right: '20px', 
+                zIndex: '999999', 
+                fontFamily: 'Arial, sans-serif',
+                pointerEvents: 'none'
             });
 
             const customStyles = document.createElement('style');
@@ -63,15 +70,17 @@ async function initMonitorTareas() {
             `;
             document.head.appendChild(customStyles);
 
+            // FIX 2: Reactivar los clics solo en el botón
             const miniBtnHtml = `
-                <button id="btn-mini-tareas" style="background-color: #dc2626; color: white; border: 1px solid #dc2626; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: ${estadoMemoria !== 'nuevo' && !isPinned ? 'inline-flex' : 'none'}; align-items: center; gap: 8px; transition: background 0.2s;" onmouseover="this.style.backgroundColor='#b91c1c'" onmouseout="this.style.backgroundColor='#dc2626'">
+                <button id="btn-mini-tareas" style="pointer-events: auto; background-color: #dc2626; color: white; border: 1px solid #dc2626; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: ${estadoMemoria !== 'nuevo' && !isPinned ? 'inline-flex' : 'none'}; align-items: center; gap: 8px; transition: background 0.2s;" onmouseover="this.style.backgroundColor='#b91c1c'" onmouseout="this.style.backgroundColor='#dc2626'">
                     ${ICONOS_USAT.tareasPortapapeles}
                     <span>${tareas.length} Tareas Pendientes</span>
                 </button>
             `;
 
+            // FIX 3: Reactivar los clics solo en el panel y aislar el scroll con overscroll-behavior
             const panelHtml = `
-                <div id="panel-tareas-usat" style="width: 320px; display: ${estadoMemoria === 'nuevo' || isPinned ? 'block' : 'none'}; background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden;">
+                <div id="panel-tareas-usat" style="pointer-events: auto; width: 320px; display: ${estadoMemoria === 'nuevo' || isPinned ? 'block' : 'none'}; background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden;">
                     
                     <div style="background-color: #dc2626; padding: 10px 12px; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center; position: relative;">
                         <span style="font-size: 14px; font-weight: bold; color: white; display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
@@ -91,7 +100,7 @@ async function initMonitorTareas() {
                         <div id="barra-progreso-tareas" style="position: absolute; bottom: 0; left: 0; height: 3px; background-color: rgba(255,255,255,0.8); width: 100%; display: ${isPinned ? 'none' : 'block'};"></div>
                     </div>
 
-                    <ul style="list-style: none; padding: 0; margin: 0; max-height: 280px; overflow-y: auto;">
+                    <ul style="list-style: none; padding: 0; margin: 0; max-height: 280px; overflow-y: auto; overscroll-behavior: contain;">
                         ${tareas.map(t => `
                             <li style="padding: 12px; border-bottom: 1px solid #f3f4f6; transition: background 0.2s;">
                                 <a href="${t.enlace}" style="color: #1f2937; text-decoration: none; font-size: 12px; display: block; font-weight: 600; margin-bottom: 4px;" onmouseover="this.style.color='#dc2626'" onmouseout="this.style.color='#1f2937'">${t.titulo}</a>
