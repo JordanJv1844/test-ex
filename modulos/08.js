@@ -134,6 +134,7 @@ function initDashboardInteligente() {
     document.getElementById('usat-btn-notas').addEventListener('click', (e) => { e.preventDefault(); ejecutarMenuNativo('calificadorestudiante.aspx'); });
 
     // Carnet
+    // Carnet
     document.getElementById('usat-btn-carnet').addEventListener('click', (e) => {
         e.preventDefault();
         ejecutarMenuNativo('cursosmatriculados.aspx');
@@ -141,28 +142,31 @@ function initDashboardInteligente() {
         const sabueso = setInterval(() => {
             intentos++;
             const boton = document.querySelector('#divCarnet a[title*="VISUALIZAR CARNET"]');
+            
             if (!boton) {
                 if (intentos >= 30) {
                     clearInterval(sabueso);
-                    
                 }
                 return;
             }
+            
             clearInterval(sabueso);
+            
+            // Como estamos en el entorno MAIN de la web, extraemos y ejecutamos su función nativa directamente
             const href = boton.getAttribute('href');
-            const coincidencia = href?.match(/^\s*javascript:\s*fnAbrirCarnet\((.*)\);?\s*$/i);
-            if (!coincidencia) return;
-
-            const argumentos = [];
-            const patron = /'((?:\\.|[^'\\])*)'\s*(?:,|$)/g;
-            let resultado;
-            while ((resultado = patron.exec(coincidencia[1])) !== null) {
-                argumentos.push(resultado[1].replace(/\\(['\\])/g, '$1'));
+            if (href && href.toLowerCase().startsWith('javascript:')) {
+                // Ejecutamos el código JavaScript de la USAT
+                const codigoNativo = href.replace(/javascript:/i, '');
+                
+                // Creamos un script temporal para ejecutarlo limpiamente
+                const tempScript = document.createElement('script');
+                tempScript.textContent = codigoNativo;
+                document.body.appendChild(tempScript);
+                tempScript.remove();
+            } else {
+                // Respaldo por si cambian la estructura del enlace
+                boton.click();
             }
-
-            if (argumentos.length !== 6) return;
-
-            chrome.runtime.sendMessage({ type: 'USAT_ABRIR_CARNET', argumentos: argumentos }, () => { });
         }, 500);
     });
 
