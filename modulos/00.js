@@ -112,3 +112,5 @@ function initGuardianSesion() {
 }
 window.ICONOS_USAT = ICONOS_USAT;
 window.forzarIngreso = forzarIngreso;
+window.initAutoRedirect = initAutoRedirect;
+window.initGuardianSesion = initGuardianSesion;
