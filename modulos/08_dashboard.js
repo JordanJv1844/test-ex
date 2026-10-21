@@ -349,3 +349,4 @@ function initDashboardInteligente() {
         }
     };
 }
+window.initDashboardInteligente = initDashboardInteligente;
