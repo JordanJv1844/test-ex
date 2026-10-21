@@ -345,3 +345,5 @@ function initOverhaulMinimalista() {
     styleElement.textContent = cssMinimalista;
     document.head.appendChild(styleElement);
 }
+
+window.initCourseFilter = initCourseFilter;
