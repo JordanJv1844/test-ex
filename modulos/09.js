@@ -1073,4 +1073,9 @@ function initHorarioInteractivo() {
             alert("Error: El Módulo del Aula Virtual (Dashboard) no está cargado.");
         }
     });
+    
 }
+
+
+window.initHorarioInteractivo = initHorarioInteractivo;
+
