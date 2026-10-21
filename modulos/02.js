@@ -11,7 +11,7 @@ function initAdBlocker() {
     if (modales.length === 0) return;
 
     const ahora = new Date().getTime();
-    const LIMITE_HORAS = 10; // Límite de vida del anuncio más reciente
+    const LIMITE_HORAS = 3; // Límite de vida del anuncio más reciente
     let anunciosVisiblesCount = 0;
 
     let registroAnuncios = JSON.parse(localStorage.getItem('usat_registro_anuncios') || '{}');
