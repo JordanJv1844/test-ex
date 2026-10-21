@@ -191,3 +191,5 @@ async function initMonitorTareas() {
         console.log("Monitor USAT: Ocurrió un error", error);
     }
 }
+
+window.initMonitorTareas = initMonitorTareas;
