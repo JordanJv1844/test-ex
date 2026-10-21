@@ -347,3 +347,5 @@ function initOverhaulMinimalista() {
 }
 
 window.initCourseFilter = initCourseFilter;
+window.initOverhaulMinimalista = initOverhaulMinimalista;
+
