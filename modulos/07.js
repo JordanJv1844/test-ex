@@ -1,6 +1,5 @@
-
-const forzarIngreso = window.forzarIngreso;
 const ICONOS_USAT = window.ICONOS_USAT;
+const forzarIngreso = window.forzarIngreso;
 
 // =========================================
 // MÓDULO 7: CALCULADORA DE NOTAS V2 (Jerarquía y Lógica Segura)
