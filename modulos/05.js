@@ -1,6 +1,8 @@
 // =========================================
 // MÓDULO 5: VISTA PREVIA INSTANTÁNEA Y VISOR PDF
 // =========================================
+const ICONOS_USAT = window.ICONOS_USAT;
+const forzarIngreso = window.forzarIngreso;
 function initVistaPreviaModal() {
     if (!window.location.href.includes('course/view.php')) return;
 
