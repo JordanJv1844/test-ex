@@ -1,7 +1,7 @@
 const ICONOS_USAT = window.ICONOS_USAT;
 
 // =========================================
-// MÓDULO 7: CALCULADORA DE NOTAS V2 (Matemática Exacta y Notificación Optimizada)
+// MÓDULO 7: CALCULADORA DE NOTAS V2 (Matemática Exacta y Notificación Global)
 // =========================================
 let isSimulating = false;
 let originalTreeHTML = '';
@@ -126,11 +126,11 @@ function initCalculadoraNotas() {
                     btnSilabo.style.display = 'inline-flex';
                     isSimulating = true;
                     
-                    // NOTIFICACIÓN FLOTANTE OPTIMIZADA CON BOTÓN DE OCULTAR
+                    // NOTIFICACIÓN FLOTANTE OPTIMIZADA E INYECTADA EN EL DOCUMENTO PRINCIPAL
                     if (!localStorage.getItem('usat_pro_hideCalcWarning')) {
-                        let toastWarning = iframeDoc.getElementById('usat-calc-warning');
+                        let toastWarning = document.getElementById('usat-calc-warning');
                         if (!toastWarning) {
-                            toastWarning = iframeDoc.createElement('div');
+                            toastWarning = document.createElement('div');
                             toastWarning.id = 'usat-calc-warning';
                             toastWarning.style.cssText = 'position: fixed; bottom: 20px; left: 20px; transform: translateX(-150%); background-color: #f59e0b; color: #fff; padding: 12px 16px; border-radius: 8px; font-family: Arial, sans-serif; font-size: 13px; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 999999; opacity: 0; transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; flex-direction: column; gap: 8px; max-width: 320px; pointer-events: auto;';
                             
@@ -143,9 +143,9 @@ function initCalculadoraNotas() {
                                     <button id="btn-hide-warning" style="background: transparent; border: none; color: white; text-decoration: underline; font-size: 11px; cursor: pointer; font-weight: normal; padding: 0;">No volver a mostrar</button>
                                 </div>
                             `;
-                            iframeDoc.body.appendChild(toastWarning);
+                            document.body.appendChild(toastWarning);
 
-                            iframeDoc.getElementById('btn-hide-warning').addEventListener('click', () => {
+                            document.getElementById('btn-hide-warning').addEventListener('click', () => {
                                 localStorage.setItem('usat_pro_hideCalcWarning', 'true');
                                 toastWarning.style.transform = 'translateX(-150%)';
                                 toastWarning.style.opacity = '0';
@@ -158,9 +158,8 @@ function initCalculadoraNotas() {
                             toastWarning.style.opacity = '1';
                         }, 10);
 
-                        // Ocultado automático a los 8 segundos si no se hace clic
                         setTimeout(() => {
-                            if (iframeDoc.getElementById('usat-calc-warning')) {
+                            if (document.getElementById('usat-calc-warning')) {
                                 toastWarning.style.transform = 'translateX(-150%)';
                                 toastWarning.style.opacity = '0';
                                 setTimeout(() => toastWarning.remove(), 400);
