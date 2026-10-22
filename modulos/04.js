@@ -15,27 +15,19 @@ function initCourseFilter() {
             .block_myoverview [data-region="courses-view"] { clear: both !important; margin-top: 12px !important; margin-bottom: 14px !important; }
             .block_myoverview [data-region="paging-bar-container"] { clear: both !important; margin-top: 10px !important; }
 
-            /* 1. OCULTAR BASURA VISUAL DE MODO TARJETA Y MODO LISTA */
-            .dashboard-card-img, .card-img-top, .dashboard-card-footer, .progress, .text-muted.small, .text-muted, .col-md-1, .more-menu { 
-                display: none !important; 
-            }
+            /* OCULTAR BASURA VISUAL */
+            .progress, .text-muted.small, .text-muted, .col-md-1, .more-menu { display: none !important; }
 
-            /* 2. FORZAR GRID UNIVERSAL DE 3 COLUMNAS (Aplica a Listas y Tarjetas) */
-            .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) > div,
-            .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) > ul,
-            .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) > .dashboard-card-deck { 
+            /* REGLA CORREGIDA: Solo afectar a la lista de grupos, respetando lo que Moodle oculta */
+            .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) .list-group { 
                 display: grid !important; 
                 grid-template-columns: repeat(3, minmax(0, 1fr)) !important; 
                 gap: 14px !important; 
                 border: none !important; 
                 width: 100% !important; 
-                margin: 0 !important;
-                padding: 0 !important;
             }
 
-            /* 3. ESTILIZAR EL CONTENEDOR INDIVIDUAL PARA QUE SEA MINIMALISTA */
-            .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) .list-group-item,
-            .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) .dashboard-card { 
+            .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) .list-group-item { 
                 position: relative !important;
                 cursor: pointer !important;
                 padding: 0 15px !important; 
@@ -53,17 +45,14 @@ function initCourseFilter() {
                 transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease !important;
             }
 
-            .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) .list-group-item:hover,
-            .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) .dashboard-card:hover {
+            .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) .list-group-item:hover {
                 transform: translateY(-1px) !important;
                 box-shadow: 0 4px 8px rgba(15, 23, 42, 0.1) !important;
                 border-color: #dc2626 !important;
             }
 
-            /* 4. RESETEAR FLEXBOXES INTERNOS NATIVOS DE MOODLE */
             .paged-content-page-container .list-group-item .row, 
-            .paged-content-page-container .list-group-item .col-md-11,
-            .dashboard-card .card-body { 
+            .paged-content-page-container .list-group-item .col-md-11 { 
                 margin: 0 !important; 
                 padding: 0 !important; 
                 width: 100% !important; 
@@ -72,7 +61,6 @@ function initCourseFilter() {
                 align-items: center !important;
             }
 
-            /* 5. TIPOGRAFÍA DEL NOMBRE DEL CURSO */
             .coursename { 
                 font-size: 12px !important; 
                 font-weight: 600 !important;
@@ -86,8 +74,7 @@ function initCourseFilter() {
                 outline: none !important;
             }
 
-            .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) .list-group-item:hover .coursename,
-            .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) .dashboard-card:hover .coursename {
+            .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) .list-group-item:hover .coursename {
                 color: #dc2626 !important;
             }
 
@@ -101,11 +88,11 @@ function initCourseFilter() {
         document.head.appendChild(style);
     }
 
-    // LÓGICA 1: Sabueso para forzar clics de "En progreso" y "Lista" (Moodle demora en cargar via AJAX)
+    // LÓGICA 1: Sabueso para forzar clics de "En progreso" y "Lista"
     let intentos = 0;
     const sabuesoFiltros = setInterval(() => {
         intentos++;
-        if (intentos > 30) { clearInterval(sabuesoFiltros); return; } // Detiene la búsqueda tras 15s
+        if (intentos > 30) { clearInterval(sabuesoFiltros); return; }
 
         const dropdownProgreso = document.querySelector('[data-filter="grouping"]');
         if (dropdownProgreso) {
@@ -119,21 +106,28 @@ function initCourseFilter() {
         if (dropdownVista) {
             const btnLista = document.querySelector('[data-display-option="display"][data-value="list"]');
             if (dropdownVista.innerText.includes('Lista') || dropdownVista.innerText.includes('List')) {
-                clearInterval(sabuesoFiltros); // Ya está en modo Lista
+                clearInterval(sabuesoFiltros);
             } else if (btnLista) {
                 btnLista.click();
-                clearInterval(sabuesoFiltros); // Clic exitoso
+                clearInterval(sabuesoFiltros);
             }
         }
     }, 500);
 
-    // LÓGICA 2: Observador dinámico para ocultar cursos antiguos apenas Moodle los inyecta
+    // LÓGICA 2: Observador dinámico con Filtro de Palabras Clave
+    // Aquí puedes agregar más palabras clave si quieres ocultar otros cursos que no te sirvan
+    const palabrasClaveOcultar = [
+        '2022-', '2023-', '2024-', '2025-', 
+        'inducción', 'deportivas', 'tutoría', 'salud mental'
+    ];
+
     const observer = new MutationObserver(() => {
-        const tarjetas = document.querySelectorAll('.dashboard-card, .list-group-item');
+        const tarjetas = document.querySelectorAll('.list-group-item');
         tarjetas.forEach(t => {
-            const nombre = t.innerText || '';
-            // Limpieza de cursos de años pasados
-            if (nombre.match(/2022-|2023-|2024-|2025-/)) {
+            const nombre = (t.innerText || '').toLowerCase();
+            const debeOcultarse = palabrasClaveOcultar.some(palabra => nombre.includes(palabra.toLowerCase()));
+            
+            if (debeOcultarse) {
                 t.style.display = 'none';
             }
         });
