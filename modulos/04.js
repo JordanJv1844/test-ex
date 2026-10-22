@@ -1,7 +1,7 @@
 const ICONOS_USAT = window.ICONOS_USAT;
 
 // =========================================
-// MÓDULO 4.1: LIMPIEZA DE VISTA DE CURSOS (Blindado contra duplicados y CSS)
+// MÓDULO 4.1: LIMPIEZA DE VISTA DE CURSOS (Sin borrar nodos del DOM)
 // =========================================
 function initCourseFilter() {
     if (!window.location.href.includes('aulavirtual')) return;
@@ -26,12 +26,7 @@ function initCourseFilter() {
                 display: none !important;
             }
 
-            /* Regla de máxima especificidad por si algún nodo requiere ocultarse antes de ser removido */
-            .paged-content-page-container .list-group .list-group-item.usat-oculto,
-            .dashboard-card.usat-oculto {
-                display: none !important;
-            }
-
+            /* GRILLA DE 3 COLUMNAS PARA MODO LISTA */
             .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) .list-group { 
                 display: grid !important; 
                 grid-template-columns: repeat(3, minmax(0, 1fr)) !important; 
@@ -40,7 +35,8 @@ function initCourseFilter() {
                 width: 100% !important; 
             }
 
-            .paged-content-page-container .list-group .list-group-item { 
+            /* ESTILO DE CADA CURSO (SOLO LOS QUE NO ESTÉN MARCADOS COMO OCULTOS) */
+            .paged-content-page-container .list-group .list-group-item:not(.usat-oculto) { 
                 position: relative !important;
                 cursor: pointer !important;
                 padding: 0 15px !important; 
@@ -56,6 +52,13 @@ function initCourseFilter() {
                 align-items: center !important; 
                 overflow: hidden !important; 
                 transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease !important;
+            }
+
+            /* REGLA SUPREMA PARA OCULTAR CURSOS DE OTROS CICLOS O DUPLICADOS */
+            .paged-content-page-container .list-group .list-group-item.usat-oculto,
+            .card.dashboard-card.usat-oculto,
+            .usat-oculto {
+                display: none !important;
             }
 
             .paged-content-page-container .list-group .list-group-item:hover {
@@ -107,93 +110,73 @@ function initCourseFilter() {
         document.head.appendChild(style);
     }
 
-    // Calcular ciclo actual automáticamente (Ej: "2026-II")
+    // Ciclo actual automático (Ej: "2026-II")
     const dt = new Date();
     const dm = dt.getMonth();
-    const curCic = dt.getFullYear() + '-' + (dm >= 7 ? 'II' : dm < 2 ? '0' : 'I');
+    const curCic = dt.getFullYear() + '-' + (dm > 6 ? 'II' : dm < 2 ? '0' : 'I');
 
-    // Función destructora de cursos ajenos al ciclo y de duplicados
-    function DepurarCursosMoodle() {
-        const contenedorPrincipal = document.querySelector('.block_myoverview, [data-block="myoverview"]');
-        if (!contenedorPrincipal) return;
+    function filtrarCursos() {
+        const contenedores = document.querySelectorAll(
+            '.paged-content-page-container [data-region="paged-content-page"]:not(.hidden) .list-group, .dashboard-card-deck'
+        );
 
-        // Analizar cada contenedor de lista o mazo de tarjetas por separado
-        const contenedoresLista = contenedorPrincipal.querySelectorAll('.list-group, .dashboard-card-deck');
-        
-        contenedoresLista.forEach(lista => {
-            const items = lista.querySelectorAll('.list-group-item, .dashboard-card');
-            const vistosEnEstaLista = new Set();
+        contenedores.forEach(contenedor => {
+            const tarjetas = contenedor.querySelectorAll('.list-group-item, .card.dashboard-card');
+            const vistos = new Set();
 
-            items.forEach(item => {
-                const linkCurso = item.querySelector('a.coursename, .multiline');
-                const textoBruto = (linkCurso ? linkCurso.innerText : item.innerText) || '';
-                const nombreLimpio = textoBruto.replace(/Curso es destacado/gi, '').replace(/Nombre del curso/gi, '').trim();
+            tarjetas.forEach(card => {
+                const nodoNombre = card.querySelector('a.coursename, .multiline');
+                if (!nodoNombre) return; // Si aún está cargando por AJAX, no lo tocamos
 
-                if (!nombreLimpio) return;
+                // Limpiar textos invisibles de accesibilidad de Moodle
+                const clone = nodoNombre.cloneNode(true);
+                clone.querySelectorAll('.sr-only, .accesshide').forEach(e => e.remove());
+                const nombreCurso = clone.textContent.trim();
 
-                // Clave única por URL del curso o nombre en mayúsculas
-                const hrefCurso = item.querySelector('a.coursename')?.getAttribute('href') || nombreLimpio.toUpperCase();
+                // Si el texto sigue vacío porque Moodle no termina de renderizar, esperar
+                if (nombreCurso.length < 3) return;
 
-                // 1. Verificar si pertenece estrictamente al ciclo actual (2026-II)
-                const esDelCicloActual = nombreLimpio.toUpperCase().includes(curCic.toUpperCase());
+                const idUnico = card.getAttribute('data-course-id') || card.querySelector('a.coursename')?.href || nombreCurso;
+                const esCicloActual = nombreCurso.toUpperCase().includes(curCic.toUpperCase());
 
-                // 2. Verificar si ya fue renderizado en esta lista (Duplicado por doble petición AJAX de Moodle)
-                const estaDuplicado = vistosEnEstaLista.has(hrefCurso);
-
-                if (!esDelCicloActual || estaDuplicado) {
-                    item.classList.add('usat-oculto');
-                    item.remove(); // Lo eliminamos del DOM para que ningún !important lo vuelva a mostrar
+                if (!esCicloActual || vistos.has(idUnico)) {
+                    card.classList.add('usat-oculto');
                 } else {
-                    vistosEnEstaLista.add(hrefCurso);
+                    card.classList.remove('usat-oculto');
+                    vistos.add(idUnico);
                 }
             });
         });
     }
 
-    // Forzar vista "En progreso" y "Lista" una sola vez de forma controlada
-    let clicListaRealizado = false;
-    let clicProgresoRealizado = false;
-    let intentos = 0;
-
-    const controlVistas = setInterval(() => {
-        intentos++;
-        DepurarCursosMoodle();
-
-        if (intentos > 25) {
-            clearInterval(controlVistas);
-            return;
-        }
-
-        const dropdownProgreso = document.querySelector('#groupingdropdown');
+    // Cambiar a "En progreso" y "Lista" de forma segura y luego filtrar
+    setTimeout(() => {
+        const dropdownProgreso = document.querySelector('#groupingdropdown span');
         const btnProgreso = document.querySelector('a[data-filter="grouping"][data-value="inprogress"]');
-        if (dropdownProgreso && btnProgreso && !clicProgresoRealizado) {
-            if (!dropdownProgreso.innerText.includes('En progreso') && !dropdownProgreso.innerText.includes('In progress')) {
-                clicProgresoRealizado = true;
-                btnProgreso.click();
-            } else {
-                clicProgresoRealizado = true;
-            }
+
+        if (dropdownProgreso && btnProgreso && !dropdownProgreso.innerText.includes('En progreso')) {
+            btnProgreso.click();
         }
 
-        const dropdownVista = document.querySelector('#displaydropdown');
-        const btnLista = document.querySelector('a[data-display-option="display"][data-value="list"]');
-        if (dropdownVista && btnLista && !clicListaRealizado) {
-            if (!dropdownVista.innerText.includes('Lista') && !dropdownVista.innerText.includes('List')) {
-                clicListaRealizado = true;
+        setTimeout(() => {
+            const dropdownVista = document.querySelector('#displaydropdown span');
+            const btnLista = document.querySelector('a[data-display-option="display"][data-value="list"]');
+
+            if (dropdownVista && btnLista && !dropdownVista.innerText.includes('Lista')) {
                 btnLista.click();
-            } else {
-                clicListaRealizado = true;
             }
-        }
-    }, 400);
+            filtrarCursos();
+        }, 500);
 
-    // Observador permanente para limpiar al instante cuando Moodle recargue páginas por AJAX
-    const observer = new MutationObserver(() => {
-        DepurarCursosMoodle();
-    });
+        filtrarCursos();
+    }, 1200);
 
-    if (document.body) {
-        observer.observe(document.body, { childList: true, subtree: true });
+    // Vigilar cambios cuando Moodle termine de responder por AJAX
+    const vistaCursos = document.querySelector('[data-region="courses-view"]') || document.body;
+    if (vistaCursos) {
+        new MutationObserver(() => {
+            filtrarCursos();
+        }).observe(vistaCursos, { childList: true, subtree: true });
     }
 }
 
@@ -222,13 +205,10 @@ function initOverhaulMinimalista() {
     }
 
     const cssMinimalista = `
-        /* 1. TIPOGRAFÍA MODERNA */
         body, html, #wrapper, #page, td, th, p, span, input, button, select, textarea {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
             letter-spacing: -0.01em !important;
         }
-
-        /* 2. FONDO GENERAL GRIS SUAVE */
         body, #page, #wrapper, #page-content, #region-main-box, #region-main {
             background-color: #f1f5f9 !important;
             background-image: none !important;
@@ -236,8 +216,6 @@ function initOverhaulMinimalista() {
         #page-content, #region-main {
             padding: 8px 12px !important;
         }
-
-        /* 3. CAJA PRINCIPAL Y BLOQUES LATERALES */
         .course-content .section.main, .block {
             background-color: #ffffff !important;
             border-radius: 12px !important; 
@@ -246,7 +224,6 @@ function initOverhaulMinimalista() {
             padding: 12px 16px !important;
             margin-bottom: 12px !important;
         }
-
         .contentwithoutlink, .activity.label {
             border: none !important;
             box-shadow: none !important;
@@ -254,8 +231,6 @@ function initOverhaulMinimalista() {
             padding: 2px 0 !important;
             margin: 0 !important;
         }
-
-        /* 4. ENCABEZADOS INTERNOS DE UNIDADES */
         .course-content .well:not(.course-pano):not(.course-banner),
         .course-content .panel:not(.course-pano):not(.course-banner) {
             background-color: #f8fafc !important;
@@ -265,7 +240,6 @@ function initOverhaulMinimalista() {
             margin-bottom: 8px !important;
             box-shadow: none !important;
         }
-
         #section-0 .well,
         .course-content .well:has(.course-pano),
         .course-content .well:has(.course-banner) {
@@ -274,8 +248,6 @@ function initOverhaulMinimalista() {
             padding: 0 !important;
             box-shadow: none !important;
         }
-
-        /* 5. FILAS DE ARCHIVOS Y TAREAS */
         .section .activity:not(.label) {
             padding: 4px 8px !important;
             margin: 2px 0 !important;
@@ -295,8 +267,6 @@ function initOverhaulMinimalista() {
         .section .activity a:hover {
             color: #dc2626 !important;
         }
-
-        /* 6. PESTAÑAS DE UNIDADES */
         .nav-tabs {
             border-bottom: 2px solid #cbd5e1 !important;
             margin-bottom: 10px !important;
@@ -319,8 +289,6 @@ function initOverhaulMinimalista() {
             border-bottom-color: #dc2626 !important;
             font-weight: 700 !important;
         }
-
-        /* 7. MENÚ DE NAVEGACIÓN DERECHO */
         #divleft, .sidebar {
             background-color: #ffffff !important;
             border-right: 1px solid #cbd5e1 !important;
@@ -337,8 +305,6 @@ function initOverhaulMinimalista() {
             color: #dc2626 !important;
             text-decoration: none !important;
         }
-
-        /* 8. BANNER DEL CURSO */
         .course-pano, .course-banner {
             width: 100% !important;
             max-width: 100% !important;
@@ -359,15 +325,12 @@ function initOverhaulMinimalista() {
         .course-pano *, .course-banner * {
             max-height: none !important;
         }
-
-        /* 9. PÁGINA DE LOGIN */
         .login-container, .login-box, .card, form#form1 > div[style*="background-color: white"], div[style*="background-color:#ffffff"], div[style*="background-color: white"] {
             border-radius: 16px !important;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
             border: none !important;
             padding: 25px 20px !important;
         }
-
         #txtUsername, #txtPassword, input[type="text"].login-input, input[type="password"].login-input {
             background-color: #f8fafc !important;
             border: 1px solid #cbd5e1 !important;
@@ -385,28 +348,23 @@ function initOverhaulMinimalista() {
             background-position: 14px center !important;
             background-size: 18px !important;
         }
-
         #txtUsername {
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'%3E%3C/path%3E%3Ccircle cx='12' cy='7' r='4'%3E%3C/circle%3E%3C/svg%3E") !important;
         }
-
         #txtPassword {
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='11' rx='2' ry='2'%3E%3C/rect%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'%3E%3C/path%3E%3C/svg%3E") !important;
         }
-
         #txtUsername:focus, #txtPassword:focus {
             border-color: #dc2626 !important;
             background-color: #ffffff !important;
             box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15) !important;
             outline: none !important;
         }
-
         #txtUsername::placeholder, #txtPassword::placeholder {
             color: #94a3b8 !important;
             font-weight: 500 !important;
             opacity: 1 !important;
         }
-
         input[type="submit"], button[type="submit"], #lnkbtnIngresar {
             border-radius: 8px !important;
             font-weight: 700 !important;
