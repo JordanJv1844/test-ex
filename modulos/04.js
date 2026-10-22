@@ -28,7 +28,10 @@ function initCourseFilter() {
             /* GRILLA DE 3 COLUMNAS PARA VISTA GENERAL Y PARA CURSOS RECIENTES */
             .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) .list-group,
             [data-block="myoverview"] .dashboard-card-deck,
-            [data-region="recentlyaccessedcourses-view-content"] .dashboard-card-deck { 
+            [data-region="recentlyaccessedcourses-view-content"] .dashboard-card-deck,
+            .block_recentlyaccessedcourses .dashboard-card-deck,
+            [data-block="recentlyaccessedcourses"] .dashboard-card-deck,
+            .block_recentlyaccessedcourses .card-deck { 
                 display: grid !important; 
                 grid-template-columns: repeat(3, minmax(0, 1fr)) !important; 
                 gap: 14px !important; 
@@ -40,7 +43,9 @@ function initCourseFilter() {
             /* ESTILO COMPACTO DE BOTÓN PARA AMBOS APARTADOS */
             .paged-content-page-container .list-group .list-group-item:not(.disabled-course),
             [data-block="myoverview"] .card.dashboard-card:not(.disabled-course),
-            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card { 
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card,
+            .block_recentlyaccessedcourses .card.dashboard-card,
+            [data-block="recentlyaccessedcourses"] .card.dashboard-card { 
                 position: relative !important;
                 cursor: pointer !important;
                 padding: 0 15px !important; 
@@ -68,7 +73,9 @@ function initCourseFilter() {
 
             .paged-content-page-container .list-group .list-group-item:hover,
             [data-block="myoverview"] .card.dashboard-card:hover,
-            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card:hover {
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card:hover,
+            .block_recentlyaccessedcourses .card.dashboard-card:hover,
+            [data-block="recentlyaccessedcourses"] .card.dashboard-card:hover {
                 transform: translateY(-1px) !important;
                 box-shadow: 0 4px 8px rgba(15, 23, 42, 0.1) !important;
                 border-color: #dc2626 !important;
@@ -90,6 +97,24 @@ function initCourseFilter() {
             [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .card-img-container,
             [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .courseimage,
             [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .dashboard-card-img,
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .course-image,
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .card-img-overlay,
+            .block_recentlyaccessedcourses .card.dashboard-card .card-img,
+            .block_recentlyaccessedcourses .card.dashboard-card .card-img-top,
+            .block_recentlyaccessedcourses .card.dashboard-card .card-img-container,
+            .block_recentlyaccessedcourses .card.dashboard-card .courseimage,
+            .block_recentlyaccessedcourses .card.dashboard-card .dashboard-card-img,
+            .block_recentlyaccessedcourses .card.dashboard-card .course-image,
+            .block_recentlyaccessedcourses .card.dashboard-card .card-img-overlay,
+            [data-block="recentlyaccessedcourses"] .card.dashboard-card .card-img,
+            [data-block="recentlyaccessedcourses"] .card.dashboard-card .card-img-top,
+            [data-block="recentlyaccessedcourses"] .card.dashboard-card .card-img-container,
+            [data-block="recentlyaccessedcourses"] .card.dashboard-card .courseimage,
+            [data-block="recentlyaccessedcourses"] .card.dashboard-card .dashboard-card-img,
+            [data-block="recentlyaccessedcourses"] .card.dashboard-card .course-image,
+            [data-block="recentlyaccessedcourses"] .card.dashboard-card .card-img-overlay,
+            .block_recentlyaccessedcourses .card.dashboard-card .text-muted,
+            .block_recentlyaccessedcourses .card.dashboard-card [data-region="favourite-icon"],
             [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .text-muted,
             [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card [data-region="favourite-icon"] { 
                 display: none !important; 
@@ -101,6 +126,12 @@ function initCourseFilter() {
             [data-block="myoverview"] .card.dashboard-card .course-info-container,
             [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .card-body,
             [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .course-info-container,
+            .block_recentlyaccessedcourses .card.dashboard-card .card-body,
+            .block_recentlyaccessedcourses .card.dashboard-card .course-info-container,
+            .block_recentlyaccessedcourses .card.dashboard-card .card-body > *,
+            [data-block="recentlyaccessedcourses"] .card.dashboard-card .card-body,
+            [data-block="recentlyaccessedcourses"] .card.dashboard-card .course-info-container,
+            [data-block="recentlyaccessedcourses"] .card.dashboard-card .card-body > *,
             [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .card-body > *,
             [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .card-body .coursename,
             [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .card-body .multiline { 
@@ -136,7 +167,17 @@ function initCourseFilter() {
             [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card a.coursename,
             [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .coursename,
             [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .multiline,
-            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .card-body a { 
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .card-body a,
+            .block_recentlyaccessedcourses .card.dashboard-card a.coursename,
+            .block_recentlyaccessedcourses .card.dashboard-card .coursename,
+            .block_recentlyaccessedcourses .card.dashboard-card .multiline,
+            .block_recentlyaccessedcourses .card.dashboard-card .card-title,
+            .block_recentlyaccessedcourses .card.dashboard-card .card-title a,
+            [data-block="recentlyaccessedcourses"] .card.dashboard-card a.coursename,
+            [data-block="recentlyaccessedcourses"] .card.dashboard-card .coursename,
+            [data-block="recentlyaccessedcourses"] .card.dashboard-card .multiline,
+            [data-block="recentlyaccessedcourses"] .card.dashboard-card .card-title,
+            [data-block="recentlyaccessedcourses"] .card.dashboard-card .card-title a { 
                 font-size: 12px !important; 
                 font-weight: 600 !important;
                 color: #1e293b !important;
@@ -157,7 +198,11 @@ function initCourseFilter() {
             [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card:hover a.coursename,
             [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card:hover .coursename,
             [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card:hover .multiline,
-            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card:hover .card-body a {
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card:hover .card-body a,
+            .block_recentlyaccessedcourses .card.dashboard-card:hover .coursename,
+            .block_recentlyaccessedcourses .card.dashboard-card:hover .card-title a,
+            [data-block="recentlyaccessedcourses"] .card.dashboard-card:hover .coursename,
+            [data-block="recentlyaccessedcourses"] .card.dashboard-card:hover .card-title a {
                 color: #dc2626 !important;
             }
 
