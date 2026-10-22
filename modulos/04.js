@@ -15,10 +15,13 @@ function initCourseFilter() {
             .block_myoverview [data-region="courses-view"] { clear: both !important; margin-top: 12px !important; margin-bottom: 14px !important; }
             .block_myoverview [data-region="paging-bar-container"] { clear: both !important; margin-top: 10px !important; }
 
-            /* OCULTAR BASURA VISUAL */
+            /* CLASE PARA OCULTAR CURSOS VIEJOS Y DUPLICADOS */
+            .usat-curso-oculto { display: none !important; }
+
+            /* OCULTAR BASURA VISUAL DE MOODLE */
             .progress, .text-muted.small, .text-muted, .col-md-1, .more-menu { display: none !important; }
 
-            /* REGLA CORREGIDA: Solo afectar a la lista de grupos, respetando lo que Moodle oculta */
+            /* REGLA CORREGIDA: Solo afectar a la lista visible */
             .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) .list-group { 
                 display: grid !important; 
                 grid-template-columns: repeat(3, minmax(0, 1fr)) !important; 
@@ -88,6 +91,11 @@ function initCourseFilter() {
         document.head.appendChild(style);
     }
 
+    // EXTRAÍDO DE LA EXTENSIÓN ANTIGUA: Calcular ciclo actual automáticamente
+    let dt = new Date();
+    let dm = dt.getMonth();
+    let curCic = dt.getFullYear() + '-' + (dm > 6 ? 'II' : dm < 2 ? '0' : 'I');
+
     // LÓGICA 1: Sabueso para forzar clics de "En progreso" y "Lista"
     let intentos = 0;
     const sabuesoFiltros = setInterval(() => {
@@ -114,23 +122,38 @@ function initCourseFilter() {
         }
     }, 500);
 
-    // LÓGICA 2: Observador dinámico con Filtro de Palabras Clave
-    // Aquí puedes agregar más palabras clave si quieres ocultar otros cursos que no te sirvan
-    const palabrasClaveOcultar = [
-        '2022-', '2023-', '2024-', '2025-', 
-        'inducción', 'deportivas', 'tutoría', 'salud mental'
-    ];
-
+    // LÓGICA 2: Observador dinámico Anti-Duplicados y Filtro de Ciclo
     const observer = new MutationObserver(() => {
-        const tarjetas = document.querySelectorAll('.list-group-item');
-        tarjetas.forEach(t => {
-            const nombre = (t.innerText || '').toLowerCase();
-            const debeOcultarse = palabrasClaveOcultar.some(palabra => nombre.includes(palabra.toLowerCase()));
+        const paginasVisibles = document.querySelectorAll('.paged-content-page-container [data-region="paged-content-page"]:not(.hidden)');
+        
+        paginasVisibles.forEach(pagina => {
+            const tarjetas = pagina.querySelectorAll('.list-group-item, .dashboard-card');
+            const cursosVistos = new Set();
             
-            if (debeOcultarse) {
-                t.style.display = 'none';
-            }
+            tarjetas.forEach(t => {
+                const elementoNombre = t.querySelector('.coursename, .multiline');
+                if (!elementoNombre) return;
+                
+                const nombreCurso = elementoNombre.innerText.trim();
+                
+                // 1. Filtrar por ciclo actual (Lógica antigua)
+                const esCicloActual = nombreCurso.includes(curCic);
+                
+                // 2. Destruir duplicados causados por errores de Moodle
+                const esDuplicado = cursosVistos.has(nombreCurso);
+                
+                if (!esCicloActual || esDuplicado) {
+                    t.classList.add('usat-curso-oculto');
+                } else {
+                    t.classList.remove('usat-curso-oculto');
+                    cursosVistos.add(nombreCurso);
+                }
+            });
         });
+
+        // Ocultar bloque de "Cursos accedidos recientemente" porque duplica la vista principal
+        const recientes = document.querySelector('[data-region="recentlyaccessedcourses"]');
+        if (recientes) recientes.style.display = 'none';
     });
 
     observer.observe(document.body, { childList: true, subtree: true });
