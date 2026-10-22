@@ -1,7 +1,7 @@
 const ICONOS_USAT = window.ICONOS_USAT;
 
 // =========================================
-// MÓDULO 4.1: LIMPIEZA DE VISTA DE CURSOS (Sin borrar nodos del DOM)
+// MÓDULO 4.1: LIMPIEZA DE VISTA DE CURSOS
 // =========================================
 function initCourseFilter() {
     if (!window.location.href.includes('aulavirtual')) return;
@@ -26,7 +26,6 @@ function initCourseFilter() {
                 display: none !important;
             }
 
-            /* GRILLA DE 3 COLUMNAS PARA MODO LISTA */
             .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) .list-group { 
                 display: grid !important; 
                 grid-template-columns: repeat(3, minmax(0, 1fr)) !important; 
@@ -35,8 +34,7 @@ function initCourseFilter() {
                 width: 100% !important; 
             }
 
-            /* ESTILO DE CADA CURSO (SOLO LOS QUE NO ESTÉN MARCADOS COMO OCULTOS) */
-            .paged-content-page-container .list-group .list-group-item:not(.usat-oculto) { 
+            .paged-content-page-container .list-group .list-group-item:not(.disabled-course) { 
                 position: relative !important;
                 cursor: pointer !important;
                 padding: 0 15px !important; 
@@ -54,10 +52,9 @@ function initCourseFilter() {
                 transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease !important;
             }
 
-            /* REGLA SUPREMA PARA OCULTAR CURSOS DE OTROS CICLOS O DUPLICADOS */
-            .paged-content-page-container .list-group .list-group-item.usat-oculto,
-            .card.dashboard-card.usat-oculto,
-            .usat-oculto {
+            /* REGLA DE OCULTAMIENTO CON MÁXIMA PRIORIDAD */
+            .paged-content-page-container .list-group .list-group-item.disabled-course,
+            .card.dashboard-card.disabled-course {
                 display: none !important;
             }
 
@@ -110,74 +107,73 @@ function initCourseFilter() {
         document.head.appendChild(style);
     }
 
-    // Ciclo actual automático (Ej: "2026-II")
+    // Ciclo actual idéntico a cup-main.user.js ("2026-II")
     const dt = new Date();
     const dm = dt.getMonth();
     const curCic = dt.getFullYear() + '-' + (dm > 6 ? 'II' : dm < 2 ? '0' : 'I');
 
-    function filtrarCursos() {
+    function filterCourses() {
         const contenedores = document.querySelectorAll(
-            '.paged-content-page-container [data-region="paged-content-page"]:not(.hidden) .list-group, .dashboard-card-deck'
+            '[data-block="myoverview"] .paged-content-page-container [data-region="paged-content-page"]:not(.hidden)'
         );
 
-        contenedores.forEach(contenedor => {
-            const tarjetas = contenedor.querySelectorAll('.list-group-item, .card.dashboard-card');
-            const vistos = new Set();
+        contenedores.forEach(pagina => {
+            const items = pagina.querySelectorAll('.list-group-item, .card.dashboard-card');
+            const cursosVistos = new Set();
 
-            tarjetas.forEach(card => {
-                const nodoNombre = card.querySelector('a.coursename, .multiline');
-                if (!nodoNombre) return; // Si aún está cargando por AJAX, no lo tocamos
+            items.forEach(card => {
+                const nameEl = card.querySelector('a.coursename, .multiline');
+                if (!nameEl) return;
 
-                // Limpiar textos invisibles de accesibilidad de Moodle
-                const clone = nodoNombre.cloneNode(true);
-                clone.querySelectorAll('.sr-only, .accesshide').forEach(e => e.remove());
-                const nombreCurso = clone.textContent.trim();
+                const courseName = nameEl.textContent.trim();
+                if (!courseName) return;
 
-                // Si el texto sigue vacío porque Moodle no termina de renderizar, esperar
-                if (nombreCurso.length < 3) return;
+                const href = card.querySelector('a.coursename')?.getAttribute('href') || courseName;
+                const isCurrent = courseName.includes(curCic);
 
-                const idUnico = card.getAttribute('data-course-id') || card.querySelector('a.coursename')?.href || nombreCurso;
-                const esCicloActual = nombreCurso.toUpperCase().includes(curCic.toUpperCase());
-
-                if (!esCicloActual || vistos.has(idUnico)) {
-                    card.classList.add('usat-oculto');
+                if (isCurrent && !cursosVistos.has(href)) {
+                    card.classList.remove('disabled-course');
+                    cursosVistos.add(href);
                 } else {
-                    card.classList.remove('usat-oculto');
-                    vistos.add(idUnico);
+                    card.classList.add('disabled-course');
                 }
             });
         });
     }
 
-    // Cambiar a "En progreso" y "Lista" de forma segura y luego filtrar
-    setTimeout(() => {
-        const dropdownProgreso = document.querySelector('#groupingdropdown span');
-        const btnProgreso = document.querySelector('a[data-filter="grouping"][data-value="inprogress"]');
+    // Esperar a que Moodle cargue los cursos, cambiar vista si es necesario y filtrar
+    let intentos = 0;
+    const findList = setInterval(() => {
+        intentos++;
+        const hayCursos = document.querySelector('.list-group-item a.coursename, .card.dashboard-card .multiline');
+        
+        if (hayCursos || intentos > 25) {
+            clearInterval(findList);
 
-        if (dropdownProgreso && btnProgreso && !dropdownProgreso.innerText.includes('En progreso')) {
-            btnProgreso.click();
-        }
-
-        setTimeout(() => {
-            const dropdownVista = document.querySelector('#displaydropdown span');
-            const btnLista = document.querySelector('a[data-display-option="display"][data-value="list"]');
-
-            if (dropdownVista && btnLista && !dropdownVista.innerText.includes('Lista')) {
-                btnLista.click();
+            const dropdownProgreso = document.querySelector('#groupingdropdown span');
+            const btnProgreso = document.querySelector('a[data-filter="grouping"][data-value="inprogress"]');
+            if (dropdownProgreso && btnProgreso && !dropdownProgreso.innerText.includes('En progreso')) {
+                btnProgreso.click();
             }
-            filtrarCursos();
-        }, 500);
 
-        filtrarCursos();
-    }, 1200);
+            setTimeout(() => {
+                const dropdownVista = document.querySelector('#displaydropdown span');
+                const btnLista = document.querySelector('a[data-display-option="display"][data-value="list"]');
+                if (dropdownVista && btnLista && !dropdownVista.innerText.includes('Lista')) {
+                    btnLista.click();
+                }
+                setTimeout(filterCourses, 400);
+            }, 400);
 
-    // Vigilar cambios cuando Moodle termine de responder por AJAX
-    const vistaCursos = document.querySelector('[data-region="courses-view"]') || document.body;
-    if (vistaCursos) {
-        new MutationObserver(() => {
-            filtrarCursos();
-        }).observe(vistaCursos, { childList: true, subtree: true });
-    }
+            filterCourses();
+
+            // Mantener vigilado el contenedor por si Moodle recarga la lista por AJAX
+            const coursesView = document.querySelector('[data-region="courses-view"]');
+            if (coursesView) {
+                new MutationObserver(filterCourses).observe(coursesView, { childList: true, subtree: true });
+            }
+        }
+    }, 400);
 }
 
 // =========================================
