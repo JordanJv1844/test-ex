@@ -1,7 +1,7 @@
 const ICONOS_USAT = window.ICONOS_USAT;
 
 // =========================================
-// MÓDULO 4.1: LIMPIEZA DE VISTA DE CURSOS
+// MÓDULO 4.1: LIMPIEZA DE VISTA DE CURSOS (Con Cursos Recientes visibles)
 // =========================================
 function initCourseFilter() {
     if (!window.location.href.includes('aulavirtual')) return;
@@ -20,25 +20,29 @@ function initCourseFilter() {
                 margin-top: 12px !important;
                 margin-bottom: 14px !important;
             }
-            .block_myoverview [data-region="paging-bar-container"],
-            [data-region="recentlyaccessedcourses"],
-            .block_recentlyaccessedcourses {
-                display: none !important;
+            .block_myoverview [data-region="paging-bar-container"] {
+                clear: both !important;
+                margin-top: 10px !important;
             }
 
-            .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) .list-group { 
+            /* GRILLA DE 3 COLUMNAS PARA VISTA GENERAL Y PARA CURSOS RECIENTES */
+            .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) .list-group,
+            [data-region="recentlyaccessedcourses-view-content"] .dashboard-card-deck { 
                 display: grid !important; 
                 grid-template-columns: repeat(3, minmax(0, 1fr)) !important; 
                 gap: 14px !important; 
                 border: none !important; 
                 width: 100% !important; 
+                padding-top: 8px !important;
             }
 
-            .paged-content-page-container .list-group .list-group-item:not(.disabled-course) { 
+            /* ESTILO COMPACTO DE BOTÓN PARA AMBOS APARTADOS */
+            .paged-content-page-container .list-group .list-group-item:not(.disabled-course),
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card { 
                 position: relative !important;
                 cursor: pointer !important;
                 padding: 0 15px !important; 
-                margin-bottom: 0 !important; 
+                margin: 0 !important; 
                 border-radius: 8px !important; 
                 border: 1px solid #cbd5e1 !important; 
                 background-color: #ffffff !important;
@@ -46,41 +50,54 @@ function initCourseFilter() {
                 height: 42px !important; 
                 min-height: 42px !important;
                 max-height: 42px !important;
+                width: 100% !important;
                 display: flex !important; 
                 align-items: center !important; 
                 overflow: hidden !important; 
                 transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease !important;
             }
 
-            /* REGLA DE OCULTAMIENTO CON MÁXIMA PRIORIDAD */
+            /* REGLA DE OCULTAMIENTO SOLO PARA LA VISTA GENERAL (NO AFECTA A RECIENTES) */
             .paged-content-page-container .list-group .list-group-item.disabled-course,
-            .card.dashboard-card.disabled-course {
+            .block_myoverview .card.dashboard-card.disabled-course {
                 display: none !important;
             }
 
-            .paged-content-page-container .list-group .list-group-item:hover {
+            .paged-content-page-container .list-group .list-group-item:hover,
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card:hover {
                 transform: translateY(-1px) !important;
                 box-shadow: 0 4px 8px rgba(15, 23, 42, 0.1) !important;
                 border-color: #dc2626 !important;
             }
 
+            /* OCULTAR IMÁGENES Y ELEMENTOS EXTRA EN LISTA Y EN CURSOS RECIENTES */
             .paged-content-page-container .list-group .list-group-item .text-muted, 
             .paged-content-page-container .list-group .list-group-item .col-md-1, 
             .paged-content-page-container .list-group .list-group-item .progress, 
             .paged-content-page-container .list-group .list-group-item .text-muted.small,
-            .paged-content-page-container .list-group .list-group-item .more-menu { 
+            .paged-content-page-container .list-group .list-group-item .more-menu,
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card > a,
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .card-img,
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .text-muted,
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card [data-region="favourite-icon"] { 
                 display: none !important; 
             }
 
             .paged-content-page-container .list-group .list-group-item .row, 
-            .paged-content-page-container .list-group .list-group-item .col-md-11 { 
+            .paged-content-page-container .list-group .list-group-item .col-md-11,
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .card-body,
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .course-info-container { 
                 margin: 0 !important; 
                 padding: 0 !important; 
                 width: 100% !important; 
                 min-width: 0 !important; 
+                display: flex !important;
+                align-items: center !important;
             }
 
-            .paged-content-page-container .list-group .list-group-item .coursename { 
+            .paged-content-page-container .list-group .list-group-item .coursename,
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card a.coursename,
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card a.coursename .multiline { 
                 font-size: 12px !important; 
                 font-weight: 600 !important;
                 color: #1e293b !important;
@@ -91,13 +108,18 @@ function initCourseFilter() {
                 width: 100% !important; 
                 text-decoration: none !important;
                 outline: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
             }
 
-            .paged-content-page-container .list-group .list-group-item:hover .coursename {
+            .paged-content-page-container .list-group .list-group-item:hover .coursename,
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card:hover a.coursename,
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card:hover a.coursename .multiline {
                 color: #dc2626 !important;
             }
 
-            .paged-content-page-container .list-group .list-group-item a.coursename::after {
+            .paged-content-page-container .list-group .list-group-item a.coursename::after,
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card a.coursename::after {
                 content: "" !important;
                 position: absolute !important;
                 inset: 0 !important;
@@ -107,11 +129,12 @@ function initCourseFilter() {
         document.head.appendChild(style);
     }
 
-    // Ciclo actual idéntico a cup-main.user.js ("2026-II")
+    // Ciclo actual automático ("2026-II")
     const dt = new Date();
     const dm = dt.getMonth();
     const curCic = dt.getFullYear() + '-' + (dm > 6 ? 'II' : dm < 2 ? '0' : 'I');
 
+    // Filtra ÚNICAMENTE dentro de "Vista general de curso" ([data-block="myoverview"])
     function filterCourses() {
         const contenedores = document.querySelectorAll(
             '[data-block="myoverview"] .paged-content-page-container [data-region="paged-content-page"]:not(.hidden)'
@@ -141,11 +164,10 @@ function initCourseFilter() {
         });
     }
 
-    // Esperar a que Moodle cargue los cursos, cambiar vista si es necesario y filtrar
     let intentos = 0;
     const findList = setInterval(() => {
         intentos++;
-        const hayCursos = document.querySelector('.list-group-item a.coursename, .card.dashboard-card .multiline');
+        const hayCursos = document.querySelector('[data-block="myoverview"] .list-group-item a.coursename, [data-block="myoverview"] .card.dashboard-card .multiline');
         
         if (hayCursos || intentos > 25) {
             clearInterval(findList);
@@ -167,7 +189,6 @@ function initCourseFilter() {
 
             filterCourses();
 
-            // Mantener vigilado el contenedor por si Moodle recarga la lista por AJAX
             const coursesView = document.querySelector('[data-region="courses-view"]');
             if (coursesView) {
                 new MutationObserver(filterCourses).observe(coursesView, { childList: true, subtree: true });
