@@ -85,8 +85,11 @@ function initCourseFilter() {
             [data-block="myoverview"] .card.dashboard-card .course-summary,
             [data-block="myoverview"] .card.dashboard-card .text-muted,
             [data-block="myoverview"] .card.dashboard-card [data-region="favourite-icon"],
-            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card > a,
             [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .card-img,
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .card-img-top,
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .card-img-container,
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .courseimage,
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .dashboard-card-img,
             [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .text-muted,
             [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card [data-region="favourite-icon"] { 
                 display: none !important; 
@@ -97,7 +100,10 @@ function initCourseFilter() {
             [data-block="myoverview"] .card.dashboard-card .card-body,
             [data-block="myoverview"] .card.dashboard-card .course-info-container,
             [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .card-body,
-            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .course-info-container { 
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .course-info-container,
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .card-body > *,
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .card-body .coursename,
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .card-body .multiline { 
                 margin: 0 !important; 
                 padding: 0 !important; 
                 width: 100% !important; 
@@ -106,11 +112,31 @@ function initCourseFilter() {
                 align-items: center !important;
             }
 
+            /* En cursos recientes, no ocultar el enlace que contiene el nombre */
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .card-body {
+                display: flex !important;
+                align-items: center !important;
+                width: 100% !important;
+                min-width: 0 !important;
+                height: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .card-body a,
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card a.coursename {
+                min-width: 0 !important;
+                max-width: 100% !important;
+                flex: 1 1 auto !important;
+            }
+
             .paged-content-page-container .list-group .list-group-item .coursename,
             [data-block="myoverview"] .card.dashboard-card a.coursename,
             [data-block="myoverview"] .card.dashboard-card .multiline,
             [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card a.coursename,
-            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card a.coursename .multiline { 
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .coursename,
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .multiline,
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card .card-body a { 
                 font-size: 12px !important; 
                 font-weight: 600 !important;
                 color: #1e293b !important;
@@ -129,7 +155,9 @@ function initCourseFilter() {
             [data-block="myoverview"] .card.dashboard-card:hover a.coursename,
             [data-block="myoverview"] .card.dashboard-card:hover .multiline,
             [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card:hover a.coursename,
-            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card:hover a.coursename .multiline {
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card:hover .coursename,
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card:hover .multiline,
+            [data-region="recentlyaccessedcourses-view-content"] .card.dashboard-card:hover .card-body a {
                 color: #dc2626 !important;
             }
 
