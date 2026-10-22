@@ -1,27 +1,37 @@
 const ICONOS_USAT = window.ICONOS_USAT;
 
 // =========================================
-// MÓDULO 4.1: LIMPIEZA DE VISTA DE CURSOS
+// MÓDULO 4.1: LIMPIEZA DE VISTA DE CURSOS (Blindado contra duplicados y CSS)
 // =========================================
 function initCourseFilter() {
-    // Solo se ejecuta si estamos en la vista de Mis Cursos (Dashboard)
-    if (!window.location.href.includes('my/')) return;
+    if (!window.location.href.includes('aulavirtual')) return;
 
     if (!document.getElementById('css-limpieza-cursos')) {
         const style = document.createElement('style');
         style.id = 'css-limpieza-cursos';
         style.textContent = `
-            .block_myoverview [data-region="filter"] { clear: both !important; margin-top: 8px !important; margin-bottom: 14px !important; }
-            .block_myoverview [data-region="courses-view"] { clear: both !important; margin-top: 12px !important; margin-bottom: 14px !important; }
-            .block_myoverview [data-region="paging-bar-container"] { clear: both !important; margin-top: 10px !important; }
+            .block_myoverview [data-region="filter"] {
+                clear: both !important;
+                margin-top: 8px !important;
+                margin-bottom: 14px !important;
+            }
+            .block_myoverview [data-region="courses-view"] {
+                clear: both !important;
+                margin-top: 12px !important;
+                margin-bottom: 14px !important;
+            }
+            .block_myoverview [data-region="paging-bar-container"],
+            [data-region="recentlyaccessedcourses"],
+            .block_recentlyaccessedcourses {
+                display: none !important;
+            }
 
-            /* CLASE PARA OCULTAR CURSOS VIEJOS Y DUPLICADOS */
-            .usat-curso-oculto { display: none !important; }
+            /* Regla de máxima especificidad por si algún nodo requiere ocultarse antes de ser removido */
+            .paged-content-page-container .list-group .list-group-item.usat-oculto,
+            .dashboard-card.usat-oculto {
+                display: none !important;
+            }
 
-            /* OCULTAR BASURA VISUAL DE MOODLE */
-            .progress, .text-muted.small, .text-muted, .col-md-1, .more-menu { display: none !important; }
-
-            /* REGLA CORREGIDA: Solo afectar a la lista visible */
             .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) .list-group { 
                 display: grid !important; 
                 grid-template-columns: repeat(3, minmax(0, 1fr)) !important; 
@@ -30,11 +40,11 @@ function initCourseFilter() {
                 width: 100% !important; 
             }
 
-            .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) .list-group-item { 
+            .paged-content-page-container .list-group .list-group-item { 
                 position: relative !important;
                 cursor: pointer !important;
                 padding: 0 15px !important; 
-                margin: 0 !important; 
+                margin-bottom: 0 !important; 
                 border-radius: 8px !important; 
                 border: 1px solid #cbd5e1 !important; 
                 background-color: #ffffff !important;
@@ -48,23 +58,29 @@ function initCourseFilter() {
                 transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease !important;
             }
 
-            .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) .list-group-item:hover {
+            .paged-content-page-container .list-group .list-group-item:hover {
                 transform: translateY(-1px) !important;
                 box-shadow: 0 4px 8px rgba(15, 23, 42, 0.1) !important;
                 border-color: #dc2626 !important;
             }
 
-            .paged-content-page-container .list-group-item .row, 
-            .paged-content-page-container .list-group-item .col-md-11 { 
+            .paged-content-page-container .list-group .list-group-item .text-muted, 
+            .paged-content-page-container .list-group .list-group-item .col-md-1, 
+            .paged-content-page-container .list-group .list-group-item .progress, 
+            .paged-content-page-container .list-group .list-group-item .text-muted.small,
+            .paged-content-page-container .list-group .list-group-item .more-menu { 
+                display: none !important; 
+            }
+
+            .paged-content-page-container .list-group .list-group-item .row, 
+            .paged-content-page-container .list-group .list-group-item .col-md-11 { 
                 margin: 0 !important; 
                 padding: 0 !important; 
                 width: 100% !important; 
                 min-width: 0 !important; 
-                display: flex !important; 
-                align-items: center !important;
             }
 
-            .coursename { 
+            .paged-content-page-container .list-group .list-group-item .coursename { 
                 font-size: 12px !important; 
                 font-weight: 600 !important;
                 color: #1e293b !important;
@@ -77,11 +93,11 @@ function initCourseFilter() {
                 outline: none !important;
             }
 
-            .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) .list-group-item:hover .coursename {
+            .paged-content-page-container .list-group .list-group-item:hover .coursename {
                 color: #dc2626 !important;
             }
 
-            .coursename::after {
+            .paged-content-page-container .list-group .list-group-item a.coursename::after {
                 content: "" !important;
                 position: absolute !important;
                 inset: 0 !important;
@@ -91,72 +107,94 @@ function initCourseFilter() {
         document.head.appendChild(style);
     }
 
-    // EXTRAÍDO DE LA EXTENSIÓN ANTIGUA: Calcular ciclo actual automáticamente
-    let dt = new Date();
-    let dm = dt.getMonth();
-    let curCic = dt.getFullYear() + '-' + (dm > 6 ? 'II' : dm < 2 ? '0' : 'I');
+    // Calcular ciclo actual automáticamente (Ej: "2026-II")
+    const dt = new Date();
+    const dm = dt.getMonth();
+    const curCic = dt.getFullYear() + '-' + (dm >= 7 ? 'II' : dm < 2 ? '0' : 'I');
 
-    // LÓGICA 1: Sabueso para forzar clics de "En progreso" y "Lista"
-    let intentos = 0;
-    const sabuesoFiltros = setInterval(() => {
-        intentos++;
-        if (intentos > 30) { clearInterval(sabuesoFiltros); return; }
+    // Función destructora de cursos ajenos al ciclo y de duplicados
+    function DepurarCursosMoodle() {
+        const contenedorPrincipal = document.querySelector('.block_myoverview, [data-block="myoverview"]');
+        if (!contenedorPrincipal) return;
 
-        const dropdownProgreso = document.querySelector('[data-filter="grouping"]');
-        if (dropdownProgreso) {
-            const btnProgreso = document.querySelector('[data-filter="grouping"][data-value="inprogress"]');
-            if (btnProgreso && !dropdownProgreso.innerText.includes('En progreso') && !dropdownProgreso.innerText.includes('In progress')) {
-                btnProgreso.click();
-            }
-        }
-
-        const dropdownVista = document.querySelector('[data-display-option="display"]');
-        if (dropdownVista) {
-            const btnLista = document.querySelector('[data-display-option="display"][data-value="list"]');
-            if (dropdownVista.innerText.includes('Lista') || dropdownVista.innerText.includes('List')) {
-                clearInterval(sabuesoFiltros);
-            } else if (btnLista) {
-                btnLista.click();
-                clearInterval(sabuesoFiltros);
-            }
-        }
-    }, 500);
-
-    // LÓGICA 2: Observador dinámico Anti-Duplicados y Filtro de Ciclo
-    const observer = new MutationObserver(() => {
-        const paginasVisibles = document.querySelectorAll('.paged-content-page-container [data-region="paged-content-page"]:not(.hidden)');
+        // Analizar cada contenedor de lista o mazo de tarjetas por separado
+        const contenedoresLista = contenedorPrincipal.querySelectorAll('.list-group, .dashboard-card-deck');
         
-        paginasVisibles.forEach(pagina => {
-            const tarjetas = pagina.querySelectorAll('.list-group-item, .dashboard-card');
-            const cursosVistos = new Set();
-            
-            tarjetas.forEach(t => {
-                const elementoNombre = t.querySelector('.coursename, .multiline');
-                if (!elementoNombre) return;
-                
-                const nombreCurso = elementoNombre.innerText.trim();
-                
-                // 1. Filtrar por ciclo actual (Lógica antigua)
-                const esCicloActual = nombreCurso.includes(curCic);
-                
-                // 2. Destruir duplicados causados por errores de Moodle
-                const esDuplicado = cursosVistos.has(nombreCurso);
-                
-                if (!esCicloActual || esDuplicado) {
-                    t.classList.add('usat-curso-oculto');
+        contenedoresLista.forEach(lista => {
+            const items = lista.querySelectorAll('.list-group-item, .dashboard-card');
+            const vistosEnEstaLista = new Set();
+
+            items.forEach(item => {
+                const linkCurso = item.querySelector('a.coursename, .multiline');
+                const textoBruto = (linkCurso ? linkCurso.innerText : item.innerText) || '';
+                const nombreLimpio = textoBruto.replace(/Curso es destacado/gi, '').replace(/Nombre del curso/gi, '').trim();
+
+                if (!nombreLimpio) return;
+
+                // Clave única por URL del curso o nombre en mayúsculas
+                const hrefCurso = item.querySelector('a.coursename')?.getAttribute('href') || nombreLimpio.toUpperCase();
+
+                // 1. Verificar si pertenece estrictamente al ciclo actual (2026-II)
+                const esDelCicloActual = nombreLimpio.toUpperCase().includes(curCic.toUpperCase());
+
+                // 2. Verificar si ya fue renderizado en esta lista (Duplicado por doble petición AJAX de Moodle)
+                const estaDuplicado = vistosEnEstaLista.has(hrefCurso);
+
+                if (!esDelCicloActual || estaDuplicado) {
+                    item.classList.add('usat-oculto');
+                    item.remove(); // Lo eliminamos del DOM para que ningún !important lo vuelva a mostrar
                 } else {
-                    t.classList.remove('usat-curso-oculto');
-                    cursosVistos.add(nombreCurso);
+                    vistosEnEstaLista.add(hrefCurso);
                 }
             });
         });
+    }
 
-        // Ocultar bloque de "Cursos accedidos recientemente" porque duplica la vista principal
-        const recientes = document.querySelector('[data-region="recentlyaccessedcourses"]');
-        if (recientes) recientes.style.display = 'none';
+    // Forzar vista "En progreso" y "Lista" una sola vez de forma controlada
+    let clicListaRealizado = false;
+    let clicProgresoRealizado = false;
+    let intentos = 0;
+
+    const controlVistas = setInterval(() => {
+        intentos++;
+        DepurarCursosMoodle();
+
+        if (intentos > 25) {
+            clearInterval(controlVistas);
+            return;
+        }
+
+        const dropdownProgreso = document.querySelector('#groupingdropdown');
+        const btnProgreso = document.querySelector('a[data-filter="grouping"][data-value="inprogress"]');
+        if (dropdownProgreso && btnProgreso && !clicProgresoRealizado) {
+            if (!dropdownProgreso.innerText.includes('En progreso') && !dropdownProgreso.innerText.includes('In progress')) {
+                clicProgresoRealizado = true;
+                btnProgreso.click();
+            } else {
+                clicProgresoRealizado = true;
+            }
+        }
+
+        const dropdownVista = document.querySelector('#displaydropdown');
+        const btnLista = document.querySelector('a[data-display-option="display"][data-value="list"]');
+        if (dropdownVista && btnLista && !clicListaRealizado) {
+            if (!dropdownVista.innerText.includes('Lista') && !dropdownVista.innerText.includes('List')) {
+                clicListaRealizado = true;
+                btnLista.click();
+            } else {
+                clicListaRealizado = true;
+            }
+        }
+    }, 400);
+
+    // Observador permanente para limpiar al instante cuando Moodle recargue páginas por AJAX
+    const observer = new MutationObserver(() => {
+        DepurarCursosMoodle();
     });
 
-    observer.observe(document.body, { childList: true, subtree: true });
+    if (document.body) {
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
 }
 
 // =========================================
@@ -165,7 +203,6 @@ function initCourseFilter() {
 function initOverhaulMinimalista() {
     if (!window.location.href.includes('usat.edu.pe')) return;
 
-    // 1. Lógica JS para la página de Login
     const txtUser = document.getElementById('txtUsername');
     const txtPass = document.getElementById('txtPassword');
     
@@ -184,7 +221,6 @@ function initOverhaulMinimalista() {
         });
     }
 
-    // 2. Estilos CSS
     const cssMinimalista = `
         /* 1. TIPOGRAFÍA MODERNA */
         body, html, #wrapper, #page, td, th, p, span, input, button, select, textarea {
@@ -389,6 +425,6 @@ function initOverhaulMinimalista() {
     styleElement.textContent = cssMinimalista;
     document.head.appendChild(styleElement);
 }
-console.log('4');
+
 window.initCourseFilter = initCourseFilter;
 window.initOverhaulMinimalista = initOverhaulMinimalista;
