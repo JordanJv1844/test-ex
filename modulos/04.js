@@ -1,39 +1,45 @@
+const ICONOS_USAT = window.ICONOS_USAT;
+
 // =========================================
 // MÓDULO 4.1: LIMPIEZA DE VISTA DE CURSOS
 // =========================================
 function initCourseFilter() {
+    // Solo se ejecuta si estamos en la vista de Mis Cursos (Dashboard)
+    if (!window.location.href.includes('my/')) return;
+
     if (!document.getElementById('css-limpieza-cursos')) {
         const style = document.createElement('style');
         style.id = 'css-limpieza-cursos';
         style.textContent = `
-            .block_myoverview [data-region="filter"] {
-                clear: both !important;
-                margin-top: 8px !important;
-                margin-bottom: 14px !important;
-            }
-            .block_myoverview [data-region="courses-view"] {
-                clear: both !important;
-                margin-top: 12px !important;
-                margin-bottom: 14px !important;
-            }
-            .block_myoverview [data-region="paging-bar-container"] {
-                clear: both !important;
-                margin-top: 10px !important;
+            .block_myoverview [data-region="filter"] { clear: both !important; margin-top: 8px !important; margin-bottom: 14px !important; }
+            .block_myoverview [data-region="courses-view"] { clear: both !important; margin-top: 12px !important; margin-bottom: 14px !important; }
+            .block_myoverview [data-region="paging-bar-container"] { clear: both !important; margin-top: 10px !important; }
+
+            /* 1. OCULTAR BASURA VISUAL DE MODO TARJETA Y MODO LISTA */
+            .dashboard-card-img, .card-img-top, .dashboard-card-footer, .progress, .text-muted.small, .text-muted, .col-md-1, .more-menu { 
+                display: none !important; 
             }
 
-            .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) .list-group { 
+            /* 2. FORZAR GRID UNIVERSAL DE 3 COLUMNAS (Aplica a Listas y Tarjetas) */
+            .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) > div,
+            .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) > ul,
+            .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) > .dashboard-card-deck { 
                 display: grid !important; 
                 grid-template-columns: repeat(3, minmax(0, 1fr)) !important; 
                 gap: 14px !important; 
                 border: none !important; 
                 width: 100% !important; 
+                margin: 0 !important;
+                padding: 0 !important;
             }
 
-            .paged-content-page-container .list-group .list-group-item { 
+            /* 3. ESTILIZAR EL CONTENEDOR INDIVIDUAL PARA QUE SEA MINIMALISTA */
+            .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) .list-group-item,
+            .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) .dashboard-card { 
                 position: relative !important;
                 cursor: pointer !important;
                 padding: 0 15px !important; 
-                margin-bottom: 0 !important; 
+                margin: 0 !important; 
                 border-radius: 8px !important; 
                 border: 1px solid #cbd5e1 !important; 
                 background-color: #ffffff !important;
@@ -47,28 +53,27 @@ function initCourseFilter() {
                 transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease !important;
             }
 
-            .paged-content-page-container .list-group .list-group-item:hover {
+            .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) .list-group-item:hover,
+            .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) .dashboard-card:hover {
                 transform: translateY(-1px) !important;
                 box-shadow: 0 4px 8px rgba(15, 23, 42, 0.1) !important;
                 border-color: #dc2626 !important;
             }
 
-            .paged-content-page-container .list-group .list-group-item .text-muted, 
-            .paged-content-page-container .list-group .list-group-item .col-md-1, 
-            .paged-content-page-container .list-group .list-group-item .progress, 
-            .paged-content-page-container .list-group .list-group-item .text-muted.small { 
-                display: none !important; 
-            }
-
-            .paged-content-page-container .list-group .list-group-item .row, 
-            .paged-content-page-container .list-group .list-group-item .col-md-11 { 
+            /* 4. RESETEAR FLEXBOXES INTERNOS NATIVOS DE MOODLE */
+            .paged-content-page-container .list-group-item .row, 
+            .paged-content-page-container .list-group-item .col-md-11,
+            .dashboard-card .card-body { 
                 margin: 0 !important; 
                 padding: 0 !important; 
                 width: 100% !important; 
                 min-width: 0 !important; 
+                display: flex !important; 
+                align-items: center !important;
             }
 
-            .paged-content-page-container .list-group .list-group-item .coursename { 
+            /* 5. TIPOGRAFÍA DEL NOMBRE DEL CURSO */
+            .coursename { 
                 font-size: 12px !important; 
                 font-weight: 600 !important;
                 color: #1e293b !important;
@@ -81,11 +86,12 @@ function initCourseFilter() {
                 outline: none !important;
             }
 
-            .paged-content-page-container .list-group .list-group-item:hover .coursename {
+            .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) .list-group-item:hover .coursename,
+            .paged-content-page-container [data-region="paged-content-page"]:not(.hidden) .dashboard-card:hover .coursename {
                 color: #dc2626 !important;
             }
 
-            .paged-content-page-container .list-group .list-group-item a.coursename::after {
+            .coursename::after {
                 content: "" !important;
                 position: absolute !important;
                 inset: 0 !important;
@@ -95,24 +101,45 @@ function initCourseFilter() {
         document.head.appendChild(style);
     }
 
-    setTimeout(() => {
-        const dropdownProgreso = document.querySelector('#groupingdropdown span');
-        const btnProgreso = document.querySelector('a[data-filter="grouping"][data-value="inprogress"]');
+    // LÓGICA 1: Sabueso para forzar clics de "En progreso" y "Lista" (Moodle demora en cargar via AJAX)
+    let intentos = 0;
+    const sabuesoFiltros = setInterval(() => {
+        intentos++;
+        if (intentos > 30) { clearInterval(sabuesoFiltros); return; } // Detiene la búsqueda tras 15s
 
-        if (dropdownProgreso && btnProgreso && !dropdownProgreso.innerText.includes('En progreso')) {
-            btnProgreso.click();
+        const dropdownProgreso = document.querySelector('[data-filter="grouping"]');
+        if (dropdownProgreso) {
+            const btnProgreso = document.querySelector('[data-filter="grouping"][data-value="inprogress"]');
+            if (btnProgreso && !dropdownProgreso.innerText.includes('En progreso') && !dropdownProgreso.innerText.includes('In progress')) {
+                btnProgreso.click();
+            }
         }
 
-        setTimeout(() => {
-            const dropdownVista = document.querySelector('#displaydropdown span');
-            const btnLista = document.querySelector('a[data-display-option="display"][data-value="list"]');
-
-            if (dropdownVista && btnLista && !dropdownVista.innerText.includes('Lista')) {
+        const dropdownVista = document.querySelector('[data-display-option="display"]');
+        if (dropdownVista) {
+            const btnLista = document.querySelector('[data-display-option="display"][data-value="list"]');
+            if (dropdownVista.innerText.includes('Lista') || dropdownVista.innerText.includes('List')) {
+                clearInterval(sabuesoFiltros); // Ya está en modo Lista
+            } else if (btnLista) {
                 btnLista.click();
+                clearInterval(sabuesoFiltros); // Clic exitoso
             }
-        }, 500);
+        }
+    }, 500);
 
-    }, 1500);
+    // LÓGICA 2: Observador dinámico para ocultar cursos antiguos apenas Moodle los inyecta
+    const observer = new MutationObserver(() => {
+        const tarjetas = document.querySelectorAll('.dashboard-card, .list-group-item');
+        tarjetas.forEach(t => {
+            const nombre = t.innerText || '';
+            // Limpieza de cursos de años pasados
+            if (nombre.match(/2022-|2023-|2024-|2025-/)) {
+                t.style.display = 'none';
+            }
+        });
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
 }
 
 // =========================================
@@ -348,4 +375,3 @@ function initOverhaulMinimalista() {
 
 window.initCourseFilter = initCourseFilter;
 window.initOverhaulMinimalista = initOverhaulMinimalista;
-
