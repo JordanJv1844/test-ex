@@ -270,13 +270,26 @@ function initDashboardInteligente() {
                     });
 
                     // Limpieza de cursos antiguos visuales
+                    // Limpieza estricta de cursos antiguos y duplicados dentro del Modal Iframe
                     if (iframe.contentWindow.location.href.includes('aulavirtual/my')) {
-                        const tarjetas = doc.querySelectorAll('.dashboard-card, .list-group-item');
-                        tarjetas.forEach(t => {
-                            if (t.innerText.match(/2022-|2023-|2024-|2025-/)) {
-                                t.style.display = 'none';
-                            }
-                        });
+                        const dt = new Date();
+                        const curCic = dt.getFullYear() + '-' + (dt.getMonth() >= 7 ? 'II' : dt.getMonth() < 2 ? '0' : 'I');
+                        const depurarEnIframe = () => {
+                            const vistos = new Set();
+                            doc.querySelectorAll('.list-group-item, .dashboard-card').forEach(t => {
+                                const link = t.querySelector('a.coursename, .multiline');
+                                const txt = (link ? link.innerText : t.innerText).trim();
+                                if (!txt) return;
+                                const clave = t.querySelector('a.coursename')?.getAttribute('href') || txt.toUpperCase();
+                                if (!txt.toUpperCase().includes(curCic) || vistos.has(clave)) {
+                                    t.remove();
+                                } else {
+                                    vistos.add(clave);
+                                }
+                            });
+                        };
+                        depurarEnIframe();
+                        new MutationObserver(depurarEnIframe).observe(doc.body, { childList: true, subtree: true });
                     }
                 } catch (e) {
                     console.log("[Campus PLUS] Redirección interna detectada (CORS).");
