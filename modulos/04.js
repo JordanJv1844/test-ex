@@ -389,6 +389,6 @@ function initOverhaulMinimalista() {
     styleElement.textContent = cssMinimalista;
     document.head.appendChild(styleElement);
 }
-
+console.log('4');
 window.initCourseFilter = initCourseFilter;
 window.initOverhaulMinimalista = initOverhaulMinimalista;
